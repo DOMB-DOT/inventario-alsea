@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>IF·BDC — Módulo ALTAS</title>
+<style>
+:root{
+  --bg:#0B0F14;--surf:#151B23;--surf2:#1C242E;--line:#28323E;
+  --txt:#E8EDF2;--dim:#8494A5;
+  --verde:#1FA97C;--verde-d:#0C5F45;--verde-l:#6EE7B7;
+  --ambar:#F0A32A;--ambar-d:#4A3208;--ambar-l:#FBD38D;
+  --rojo:#E2484A;--rojo-d:#4A1416;--rojo-l:#F8A5A6;
+  --morado:#7B74E0;--morado-d:#231F52;--morado-l:#CFCBF5;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:#05080B;color:var(--txt);
+  font-family:-apple-system,"Segoe UI",Roboto,sans-serif;font-size:15px;line-height:1.4}
+.marco{width:100%;max-width:412px;margin:0 auto;background:var(--bg);min-height:100vh}
+
+.top{display:flex;align-items:center;justify-content:space-between;padding:12px 14px 10px;
+  border-bottom:1px solid var(--line);background:linear-gradient(180deg,#131A22,var(--bg));position:sticky;top:0;z-index:20}
+.logo{font-size:15px;font-weight:800}.logo b{color:var(--verde-l)}
+.sub{font-size:10px;color:var(--dim);margin-top:1px}
+.net{font-size:9px;font-weight:800;padding:3px 8px;border-radius:20px;background:var(--verde-d);color:var(--verde-l)}
+.ver{font-size:9px;color:var(--dim);text-align:right;margin-top:3px}
+
+.body{padding:10px 12px 24px}
+.tgl10{display:flex;align-items:center;gap:8px;background:var(--verde-d);color:var(--verde-l);
+  padding:9px 12px;border-radius:22px;font-weight:800;font-size:12px;margin-bottom:12px;cursor:pointer;user-select:none}
+.tgl10.off{background:var(--surf);color:var(--dim)}
+.dot{width:14px;height:14px;border-radius:50%;background:var(--verde-l)}
+.tgl10.off .dot{background:var(--dim)}
+
+.lab{font-size:10px;color:var(--dim);font-weight:700;letter-spacing:.4px;margin:0 0 5px 2px}
+.lab.v{color:var(--verde-l)}.lab.m{color:var(--morado-l)}
+.inp{width:100%;background:var(--surf);border:1px solid var(--line);border-radius:10px;
+  padding:11px 12px;color:var(--txt);font-size:14px;font-family:inherit}
+.inp:focus{outline:none;border-color:var(--verde)}
+.inp.v{border-color:var(--verde)} .inp.m{border-color:var(--morado)}
+
+.modos{display:flex;gap:8px;margin:2px 0 14px}
+.modo{flex:1;padding:12px;border-radius:10px;text-align:center;font-weight:800;font-size:12px;
+  border:1px solid var(--line);background:var(--surf);color:var(--txt);cursor:pointer}
+.modo small{display:block;font-size:8.5px;color:var(--dim);font-weight:600;margin-top:3px}
+.modo.sel{background:var(--verde-d);color:var(--verde-l);border-color:var(--verde)}
+.modo.sel small{color:var(--verde-l);opacity:.85}
+.modo.selm{background:var(--morado-d);color:var(--morado-l);border-color:var(--morado)}
+.modo.selm small{color:var(--morado-l);opacity:.85}
+
+.mb{margin-bottom:12px}
+.row{display:flex;gap:8px}
+.row .campo{flex:1}
+.campo{margin-bottom:10px}
+.rel{position:relative}
+.xbtn{position:absolute;right:8px;top:50%;transform:translateY(-50%);width:22px;height:22px;border-radius:50%;
+  background:var(--surf2);border:1px solid var(--line);color:var(--dim);font-size:12px;cursor:pointer;line-height:20px;text-align:center}
+
+.claveHelp{font-size:10.5px;color:var(--dim);background:var(--morado-d);border:1px solid var(--morado);
+  border-radius:8px;padding:8px 10px;margin:-2px 0 12px;display:none}
+.claveHelp.on{display:block}
+.claveHelp b{color:var(--morado-l)}
+
+.avisoNueva{font-size:11px;background:var(--ambar-d);border:1px solid var(--ambar);color:var(--ambar-l);
+  border-radius:8px;padding:9px 10px;margin-bottom:12px;display:none}
+.avisoNueva.on{display:block}
+
+.tarjeta{background:var(--surf);border:1px solid var(--line);border-radius:12px;padding:12px;margin-bottom:14px}
+.tarjeta .tt{font-size:11px;font-weight:800;color:var(--verde-l);margin-bottom:10px;letter-spacing:.4px}
+.tarjeta.nueva{border-color:var(--morado)} .tarjeta.nueva .tt{color:var(--morado-l)}
+
+.guardar{width:100%;padding:14px;border:none;border-radius:12px;background:var(--verde);color:#04150E;
+  font-size:15px;font-weight:800;font-family:inherit;cursor:pointer}
+.guardar.nueva{background:var(--morado);color:#0B0920}
+.guardar:disabled{opacity:.5}
+
+.toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:var(--surf2);
+  border:1px solid var(--line);color:var(--txt);padding:11px 16px;border-radius:12px;font-size:13px;
+  font-weight:700;opacity:0;transition:.25s;z-index:60;max-width:360px;text-align:center}
+.toast.on{opacity:1}
+.toast.ok{border-color:var(--verde);color:var(--verde-l)}
+.toast.err{border-color:var(--rojo);color:var(--rojo-l)}
+
+datalist{color:#000}
+
+.sugBox{background:var(--surf2);border:1px solid var(--verde);border-radius:10px;margin-top:4px;
+  max-height:230px;overflow-y:auto;display:none}
+.sugBox.on{display:block}
+.sugIt{padding:9px 11px;border-bottom:1px solid var(--line);cursor:pointer;font-size:12.5px}
+.sugIt:last-child{border-bottom:none}
+.sugIt:active{background:var(--verde-d)}
+.sugIt .d{font-weight:700;color:var(--txt)}
+.sugIt .meta{font-size:10px;color:var(--dim);margin-top:2px}
+.sugIt .meta b{color:var(--verde-l)}
+.sugEmpty{padding:10px 11px;font-size:11px;color:var(--dim)}
+</style>
+</head>
+<body>
+<div class="marco">
+
+  <div class="top">
+    <div>
+      <div class="logo">IF·<b>BDC</b> — ALTAS</div>
+      <div class="sub" id="subTienda">38422 · TIENDA PRUEBA · ALSEA</div>
+    </div>
+    <div style="text-align:right">
+      <div class="net" id="net">EN LÍNEA</div>
+      <div class="ver">v29 · módulo altas</div>
+    </div>
+  </div>
+
+  <div class="body">
+
+    <div class="tgl10" id="tgl10" onclick="toggle10()"><span class="dot"></span> <span id="tgl10txt">AUTO 10% ACTIVADO</span></div>
+
+    <div class="campo">
+      <div class="lab">INVENTARISTA</div>
+      <input class="inp" id="inventarista" placeholder="Escribe tu nombre" value="EDGAR">
+    </div>
+
+    <div class="modos">
+      <div class="modo sel" id="modoBase" onclick="setModo('base')">🔎 BUSCAR EN BASE<small>el activo ya existe</small></div>
+      <div class="modo" id="modoNueva" onclick="setModo('nueva')">✨ ALTA NUEVA<small>activo que no existe</small></div>
+    </div>
+
+    <div class="campo">
+      <div class="lab v">BÚSQUEDA — escribe o escanea (serie, clave o descripción)</div>
+      <div class="rel">
+        <input class="inp v" id="busq" placeholder="Ej. S18043277910 o cigarrera" oninput="onBusq()">
+        <button class="xbtn" onclick="limpiar('busq');cerrarSug()">✕</button>
+      </div>
+      <div class="sugBox" id="sugBox"></div>
+    </div>
+
+    <div class="row mb">
+      <div class="campo" style="flex:2">
+        <div class="lab m">CLAVE CORTA (catálogo)</div>
+        <div class="rel">
+          <input class="inp m" id="clave" list="listaClaves" placeholder="Ej. %, @, CD, MR" oninput="onClave()">
+          <datalist id="listaClaves"></datalist>
+        </div>
+      </div>
+      <div class="campo" style="flex:1;display:flex;align-items:flex-end">
+        <button class="modo" style="width:100%;margin:0" onclick="toggleExacto(this)" id="btnExacto">EXACTO</button>
+      </div>
+    </div>
+    <div class="claveHelp" id="claveHelp"></div>
+
+    <div class="avisoNueva" id="avisoNueva">⚠ Descripción NUEVA. Al guardar se enviará a <b>mesa de control</b> para autorización (PENDIENTES_ALTA).</div>
+
+    <div class="tarjeta" id="tarjeta">
+      <div class="tt" id="ttTarjeta">TARJETA DE DATOS · BUSCAR EN BASE</div>
+
+      <div class="row">
+        <div class="campo"><div class="lab v">Inv Act</div><input class="inp v" id="invAct" placeholder="A-1024 / 878787"></div>
+        <div class="campo"><div class="lab">Inv Ant</div><input class="inp" id="invAnt" placeholder="opcional"></div>
+      </div>
+
+      <div class="campo">
+        <div class="lab">Descripción</div>
+        <div class="rel">
+          <input class="inp" id="descripcion" placeholder="Descripción del activo">
+          <button class="xbtn" onclick="limpiar('descripcion')">✕</button>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="campo"><div class="lab">Marca</div><input class="inp" id="marca" placeholder="Marca"></div>
+        <div class="campo"><div class="lab">Modelo</div><input class="inp" id="modelo" placeholder="Modelo"></div>
+      </div>
+
+      <div class="row">
+        <div class="campo"><div class="lab">Serie</div><input class="inp" id="serie" placeholder="Serie"></div>
+        <div class="campo"><div class="lab">Color</div><input class="inp" id="color" list="listaColores" placeholder="Color"></div>
+      </div>
+      <datalist id="listaColores"></datalist>
+
+      <div class="row">
+        <div class="campo"><div class="lab">Alto</div><input class="inp" id="alto" placeholder="cm"></div>
+        <div class="campo"><div class="lab">Ancho</div><input class="inp" id="ancho" placeholder="cm"></div>
+        <div class="campo"><div class="lab">Largo</div><input class="inp" id="largo" placeholder="cm"></div>
+      </div>
+
+      <div class="row">
+        <div class="campo"><div class="lab">Edo Fís</div><input class="inp" id="edoFis" placeholder="BUENO / REGULAR..."></div>
+        <div class="campo"><div class="lab">% Dep</div><input class="inp" id="dep" placeholder="0 a 100" inputmode="numeric"></div>
+      </div>
+
+      <div class="campo">
+        <div class="lab">Ubicación Int</div>
+        <div class="rel">
+          <input class="inp" id="ubicacion" placeholder="BARRA / COCINA / BODEGA...">
+          <button class="xbtn" onclick="limpiar('ubicacion')">✕</button>
+        </div>
+      </div>
+
+      <div class="campo">
+        <div class="lab">Comentarios</div>
+        <input class="inp" id="comentarios" placeholder="Opcional">
+      </div>
+    </div>
+
+    <button class="guardar" id="btnGuardar" onclick="guardar()">💾 GUARDAR ALTA</button>
+
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ===== URLs de tus dos backends ===== */
+var TIENDA_URL = 'https://script.google.com/macros/s/AKfycbxRnuGYTnEXUA3A2V614sEbPjj5-Yjjtf8fvrXihbffv8sTqKBBsTr0ePCH4c4O1fsvCw/exec';
+var DATA_URL   = 'https://script.google.com/macros/s/AKfycbxFS7vAj-lwln6MjetjV-IVQ6uqEZPPqnwxy1W9f54OqjVeFtZhF57qTcyQuKdboYaF/exec';
+var TIENDA_NOMBRE = '38422 · TIENDA PRUEBA';
+
+var MODO='base';           // base | nueva
+var AUTO10=true;
+var CLAVES=[];             // catalogo de claves cortas
+
+/* ===== helper JSONP ===== */
+function jsonp(url, params, cb){
+  var s=document.createElement('script');
+  var name='cb'+Date.now()+Math.floor(Math.random()*10000);
+  window[name]=function(d){ try{cb(d);}finally{ delete window[name]; s.remove(); } };
+  var q=Object.keys(params).map(function(k){return encodeURIComponent(k)+'='+encodeURIComponent(params[k]);}).join('&');
+  s.onerror=function(){ delete window[name]; s.remove(); cb({ok:false,mensaje:'Sin conexión'}); };
+  s.src=url+'?'+q+'&callback='+name;
+  document.body.appendChild(s);
+}
+
+/* ===== arranque: cargar catalogos ===== */
+window.onload=function(){
+  jsonp(DATA_URL,{accion:'catalogos'},function(d){
+    if(!d||!d.ok){ setNet(false); return; }
+    setNet(true);
+    CLAVES=d.claves||[];
+    var lc=document.getElementById('listaClaves');
+    lc.innerHTML=CLAVES.map(function(c){return '<option value="'+c.CLAVE+'">'+c.SIGNIFICADO+'</option>';}).join('');
+    var col=document.getElementById('listaColores');
+    col.innerHTML=(d.colores||[]).map(function(x){return '<option value="'+x+'">';}).join('');
+  });
+};
+function setNet(on){var n=document.getElementById('net');n.textContent=on?'EN LÍNEA':'SIN RED';
+  n.style.background=on?'var(--verde-d)':'var(--rojo-d)';n.style.color=on?'var(--verde-l)':'var(--rojo-l)';}
+
+/* ===== toggle 10% ===== */
+function toggle10(){AUTO10=!AUTO10;var t=document.getElementById('tgl10');
+  t.classList.toggle('off',!AUTO10);
+  document.getElementById('tgl10txt').textContent=AUTO10?'AUTO 10% ACTIVADO':'AUTO 10% APAGADO';
+  if(AUTO10 && !document.getElementById('dep').value) document.getElementById('dep').value='10';}
+
+/* ===== modos ===== */
+function setModo(m){
+  MODO=m;
+  var b=document.getElementById('modoBase'), n=document.getElementById('modoNueva');
+  var tj=document.getElementById('tarjeta'), tt=document.getElementById('ttTarjeta');
+  var g=document.getElementById('btnGuardar'), av=document.getElementById('avisoNueva');
+  if(m==='base'){
+    b.className='modo sel'; n.className='modo';
+    tj.className='tarjeta'; tt.textContent='TARJETA DE DATOS · BUSCAR EN BASE';
+    g.className='guardar'; g.textContent='💾 GUARDAR ALTA';
+    av.classList.remove('on');
+  }else{
+    b.className='modo'; n.className='modo selm';
+    tj.className='tarjeta nueva'; tt.textContent='TARJETA DE DATOS · ALTA NUEVA';
+    g.className='guardar nueva'; g.textContent='📤 GUARDAR Y ENVIAR A MESA DE CONTROL';
+    av.classList.add('on');
+    cerrarSug();
+  }
+}
+
+/* ===== BUSCAR EN BASE: llama a buscarBase (LABASE) ===== */
+function onBusq(){
+  var q=document.getElementById('busq').value.trim();
+  if(MODO!=='base'){ cerrarSug(); return; }        // en ALTA NUEVA no busca
+  clearTimeout(window._bt);
+  if(q.length<2){ cerrarSug(); return; }
+  window._bt=setTimeout(function(){
+    jsonp(DATA_URL,{accion:'buscarBase',q:q},function(d){
+      var box=document.getElementById('sugBox');
+      if(!d||!d.ok){ box.innerHTML='<div class="sugEmpty">Sin conexión con la base</div>'; box.classList.add('on'); return; }
+      if(!d.filas||!d.filas.length){ box.innerHTML='<div class="sugEmpty">Nada en base. Usa ✨ ALTA NUEVA si no existe.</div>'; box.classList.add('on'); return; }
+      window._sug=d.filas;
+      box.innerHTML=d.filas.map(function(f,i){
+        return '<div class="sugIt" onclick="elegirBase('+i+')">'+
+          '<div class="d">'+(f.desc||'(sin descripción)')+'</div>'+
+          '<div class="meta"><b>'+(f.marca||'-')+'</b> · '+(f.modelo||'-')+' · Serie '+(f.serie||'-')+' · INV '+(f.invAct||'-')+'</div></div>';
+      }).join('');
+      box.classList.add('on');
+    });
+  },350);
+}
+function elegirBase(i){
+  var f=(window._sug||[])[i]; if(!f) return;
+  document.getElementById('descripcion').value=f.desc||'';
+  document.getElementById('marca').value=f.marca||'';
+  document.getElementById('modelo').value=f.modelo||'';
+  document.getElementById('serie').value=f.serie||'';
+  document.getElementById('color').value=f.color||'';
+  document.getElementById('ubicacion').value=f.ubic||'';
+  cerrarSug();
+  document.getElementById('invAct').focus();
+  toast('Datos traídos de base ✔','ok');
+}
+function cerrarSug(){ document.getElementById('sugBox').classList.remove('on'); }
+
+/* ===== clave corta: muestra para qué sirve ===== */
+function onClave(){
+  var v=document.getElementById('clave').value.trim().toUpperCase();
+  var h=document.getElementById('claveHelp');
+  var found=CLAVES.filter(function(c){return String(c.CLAVE).toUpperCase()===v;})[0];
+  if(found){ h.innerHTML='<b>'+found.CLAVE+'</b> — '+found.SIGNIFICADO; h.classList.add('on'); }
+  else{ h.classList.remove('on'); }
+}
+function toggleExacto(b){ b.classList.toggle('sel'); }
+
+function limpiar(id){var e=document.getElementById(id);e.value='';e.focus();}
+
+/* ===== guardar ===== */
+function val(id){return document.getElementById(id).value.trim();}
+function guardar(){
+  var inv=val('inventarista');
+  var desc=val('descripcion');
+  if(!inv){ toast('Escribe el inventarista','err'); return; }
+  if(!val('invAct')){ toast('Falta Inv Act','err'); return; }
+  if(!desc){ toast('Falta la descripción','err'); return; }
+
+  var datos={
+    inventarista:inv, modo:(MODO==='nueva'?'ALTA NUEVA':'BASE'),
+    invAct:val('invAct'), invAnt:val('invAnt'), descripcion:desc,
+    marca:val('marca'), modelo:val('modelo'), serie:val('serie'), color:val('color'),
+    alto:val('alto'), ancho:val('ancho'), largo:val('largo'),
+    edoFis:val('edoFis'), dep:val('dep'), ubicacion:val('ubicacion'),
+    clave:val('clave'), comentarios:val('comentarios')
+  };
+
+  var g=document.getElementById('btnGuardar'); g.disabled=true;
+  toast('Guardando...','');
+
+  /* 1) siempre guarda en la tienda */
+  jsonp(TIENDA_URL,{accion:'guardarAlta',datos:JSON.stringify(datos)},function(r){
+    if(!r||!r.ok){ g.disabled=false; toast('Error al guardar en tienda','err'); return; }
+
+    if(MODO==='nueva'){
+      /* 2) además la manda a mesa de control */
+      var pend=Object.assign({tienda:TIENDA_NOMBRE, via:'APP'}, datos);
+      jsonp(DATA_URL,{accion:'nuevaAltaPendiente',datos:JSON.stringify(pend)},function(r2){
+        g.disabled=false;
+        if(r2&&r2.ok){ toast('✔ Alta guardada y enviada a mesa de control','ok'); limpiarTarjeta(); }
+        else{ toast('Guardó en tienda, pero falló el envío a mesa','err'); }
+      });
+    }else{
+      g.disabled=false; toast('✔ Alta guardada','ok'); limpiarTarjeta();
+    }
+  });
+}
+
+function limpiarTarjeta(){
+  ['invAct','invAnt','descripcion','marca','modelo','serie','color','alto','ancho','largo','edoFis','ubicacion','clave','comentarios']
+    .forEach(function(id){document.getElementById(id).value='';});
+  document.getElementById('dep').value=AUTO10?'10':'';
+  document.getElementById('busq').value='';
+  document.getElementById('claveHelp').classList.remove('on');
+  document.getElementById('invAct').focus();
+}
+
+function toast(msg,tipo){
+  var t=document.getElementById('toast'); t.textContent=msg; t.className='toast on '+(tipo||'');
+  clearTimeout(window._tt); window._tt=setTimeout(function(){t.className='toast';},2600);
+}
+</script>
+</body>
+</html>
