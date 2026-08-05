@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -216,6 +217,8 @@ var TIENDA_NOMBRE = '38422 · TIENDA PRUEBA';
 var MODO='base';           // base | nueva
 var AUTO10=true;
 var CLAVES=[];             // catalogo de claves cortas
+var BASE=[];               // LABASE completa (busqueda local)
+var BASE_LISTA=false;
 
 /* ===== helper JSONP ===== */
 function jsonp(url, params, cb){
@@ -239,7 +242,30 @@ window.onload=function(){
     var col=document.getElementById('listaColores');
     col.innerHTML=(d.colores||[]).map(function(x){return '<option value="'+x+'">';}).join('');
   });
+  cargarBase();
 };
+
+/* ===== descarga LABASE una sola vez y la deja lista para buscar local ===== */
+function cargarBase(){
+  // intenta usar copia guardada en el teléfono
+  try{
+    var g=localStorage.getItem('IFBDC_BASE');
+    if(g){ BASE=JSON.parse(g); prepararBase(); BASE_LISTA=true; }
+  }catch(e){}
+  // y de todos modos baja la última versión
+  jsonp(DATA_URL,{accion:'getBaseCompleta'},function(d){
+    if(!d||!d.ok||!d.filas){ if(!BASE_LISTA) toast('No se pudo bajar la base','err'); return; }
+    BASE=d.filas; prepararBase(); BASE_LISTA=true;
+    try{ localStorage.setItem('IFBDC_BASE',JSON.stringify(BASE)); }catch(e){}
+    toast('Base lista: '+d.total+' activos','ok');
+  });
+}
+function prepararBase(){
+  for(var i=0;i<BASE.length;i++){
+    var f=BASE[i];
+    f._q=((f.desc||'')+' '+(f.marca||'')+' '+(f.modelo||'')+' '+(f.serie||'')+' '+(f.invAct||'')).toLowerCase();
+  }
+}
 function setNet(on){var n=document.getElementById('net');n.textContent=on?'EN LÍNEA':'SIN RED';
   n.style.background=on?'var(--verde-d)':'var(--rojo-d)';n.style.color=on?'var(--verde-l)':'var(--rojo-l)';}
 
@@ -269,26 +295,26 @@ function setModo(m){
   }
 }
 
-/* ===== BUSCAR EN BASE: llama a buscarBase (LABASE) ===== */
+/* ===== BUSCAR EN BASE: busca LOCAL (instantáneo) ===== */
 function onBusq(){
-  var q=document.getElementById('busq').value.trim();
-  if(MODO!=='base'){ cerrarSug(); return; }        // en ALTA NUEVA no busca
-  clearTimeout(window._bt);
+  var q=document.getElementById('busq').value.trim().toLowerCase();
+  if(MODO!=='base'){ cerrarSug(); return; }
+  var box=document.getElementById('sugBox');
   if(q.length<2){ cerrarSug(); return; }
-  window._bt=setTimeout(function(){
-    jsonp(DATA_URL,{accion:'buscarBase',q:q},function(d){
-      var box=document.getElementById('sugBox');
-      if(!d||!d.ok){ box.innerHTML='<div class="sugEmpty">Sin conexión con la base</div>'; box.classList.add('on'); return; }
-      if(!d.filas||!d.filas.length){ box.innerHTML='<div class="sugEmpty">Nada en base. Usa ✨ ALTA NUEVA si no existe.</div>'; box.classList.add('on'); return; }
-      window._sug=d.filas;
-      box.innerHTML=d.filas.map(function(f,i){
-        return '<div class="sugIt" onclick="elegirBase('+i+')">'+
-          '<div class="d">'+(f.desc||'(sin descripción)')+'</div>'+
-          '<div class="meta"><b>'+(f.marca||'-')+'</b> · '+(f.modelo||'-')+' · Serie '+(f.serie||'-')+' · INV '+(f.invAct||'-')+'</div></div>';
-      }).join('');
-      box.classList.add('on');
-    });
-  },350);
+  if(!BASE_LISTA){ box.innerHTML='<div class="sugEmpty">Bajando base... espera un momento</div>'; box.classList.add('on'); return; }
+
+  var res=[];
+  for(var i=0;i<BASE.length && res.length<30;i++){
+    if(BASE[i]._q.indexOf(q)!==-1) res.push(BASE[i]);
+  }
+  if(!res.length){ box.innerHTML='<div class="sugEmpty">Nada en base. Usa ✨ ALTA NUEVA si no existe.</div>'; box.classList.add('on'); return; }
+  window._sug=res;
+  box.innerHTML=res.map(function(f,i){
+    return '<div class="sugIt" onclick="elegirBase('+i+')">'+
+      '<div class="d">'+(f.desc||'(sin descripción)')+'</div>'+
+      '<div class="meta"><b>'+(f.marca||'-')+'</b> · '+(f.modelo||'-')+' · Serie '+(f.serie||'-')+' · INV '+(f.invAct||'-')+'</div></div>';
+  }).join('');
+  box.classList.add('on');
 }
 function elegirBase(i){
   var f=(window._sug||[])[i]; if(!f) return;
