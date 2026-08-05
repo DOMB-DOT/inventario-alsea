@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PRUEBA CT40 — Tarjeta completa</title>
+<style>
+:root{
+  --bg:#0B0F14;--surf:#151B23;--surf2:#1C242E;--line:#28323E;
+  --txt:#E8EDF2;--dim:#8494A5;
+  --verde:#1FA97C;--verde-d:#0C5F45;--verde-l:#6EE7B7;
+  --ambar:#F0A32A;--ambar-d:#4A3208;
+  --rojo:#E2484A;--rojo-d:#4A1416;
+  --morado:#7B74E0;--morado-d:#231F52;
+  --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{width:100%;height:100%;background:#05080B;color:var(--txt);
+  font-family:-apple-system,"Segoe UI",Roboto,sans-serif;font-size:15px;line-height:1.4;overflow-x:hidden}
+.marco{width:100%;max-width:412px;margin:0 auto;background:var(--bg);min-height:100vh}
+
+.top{display:flex;align-items:center;justify-content:space-between;padding:12px 14px 10px;
+  border-bottom:1px solid var(--line);background:linear-gradient(180deg,#131A22,var(--bg));
+  position:sticky;top:0;z-index:20}
+.logo{font-size:15px;font-weight:800}
+.logo b{color:var(--verde-l)}
+.sub{font-size:10px;color:var(--dim);margin-top:1px}
+.net{font-size:9px;font-weight:800;padding:3px 8px;border-radius:20px;background:var(--verde-d);color:var(--verde-l)}
+
+.body{padding:10px 12px 20px}
+
+/* ---- toggles de tarjetas 1 y 2, COLAPSADAS por defecto ---- */
+.togglebar{display:flex;gap:6px;margin-bottom:8px}
+.tglcard{flex:1;padding:9px 8px;border-radius:9px;border:1.5px solid var(--line);
+  background:var(--surf);color:var(--dim);font-size:10px;font-weight:800;letter-spacing:.2px;
+  text-align:center;cursor:pointer;line-height:1.3}
+.tglcard.on{border-color:var(--morado);background:var(--morado-d);color:#CFCBF5}
+.tglcard .n{display:block;font-size:8.5px;opacity:.8;margin-top:1px}
+
+.panelExtra{display:none;background:var(--surf);border:1px solid var(--line);border-radius:10px;
+  padding:11px;margin-bottom:9px;font-size:11.5px;max-height:280px;overflow-y:auto}
+.panelExtra.on{display:block}
+
+.chips{display:flex;gap:4px;margin-bottom:8px;overflow-x:auto;padding-bottom:2px}
+.chip{font-size:9.5px;font-weight:700;padding:5px 9px;border-radius:12px;border:1px solid var(--line);
+  background:var(--surf);color:var(--dim);white-space:nowrap;flex-shrink:0}
+.chip.sel{background:var(--morado-d);border-color:var(--morado);color:#CFCBF5}
+.inp{width:100%;padding:9px 10px;background:var(--surf);border:1px solid var(--line);
+  border-radius:9px;color:var(--txt);font-size:11.5px;font-family:inherit;margin-bottom:6px}
+.inp.sec{border-color:var(--ambar)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.mini{margin-bottom:6px}
+.mini .l{font-size:8.5px;color:var(--dim);font-weight:700;text-transform:uppercase}
+.mini .v{font-size:12px;color:var(--txt);margin-top:1px}
+.mini .v.vacio{color:#5c6675;font-style:italic}
+.fp-par{display:flex;gap:6px;margin-top:6px}
+.fp-box{flex:1;border-radius:7px;padding:7px 8px;background:#3a0d0d;border:1px solid #C00000}
+.fp-box .l{font-size:8px;color:#ffb3b3;font-weight:800}
+.fp-box .v{font-size:12px;font-weight:800;color:#fff}
+.ff-box{flex:1;border-radius:7px;padding:7px 8px;background:#0E2019;border:1px solid var(--verde-d)}
+.ff-box .l{font-size:8px;color:#7FCFAE;font-weight:800}
+.ff-box .v{font-size:13px;font-weight:800;color:var(--verde-l);font-family:var(--mono)}
+.lockbox{margin-top:6px;padding:7px 9px;background:var(--morado-d);border:1px solid var(--morado);
+  border-radius:7px;font-size:10.5px;color:#CFCBF5}
+
+/* ---- zona de captura, PRIORIDAD de espacio ---- */
+.eyebrow{font-size:9.5px;font-weight:800;letter-spacing:1px;color:var(--dim);text-transform:uppercase;margin:10px 0 6px}
+.eyebrow:first-child{margin-top:0}
+
+.claves{display:grid;grid-template-columns:repeat(5,1fr);gap:5px}
+.clave{aspect-ratio:1;border-radius:8px;border:1.5px dashed var(--line);background:var(--surf);
+  display:flex;flex-direction:column;align-items:center;justify-content:center}
+.clave .sym{font-size:16px;font-weight:800;font-family:var(--mono);color:var(--dim);line-height:1}
+.clave .nm{font-size:6.5px;color:var(--dim);margin-top:1px;font-weight:700}
+.clave.sel{background:var(--ambar-d);border:1.5px solid var(--ambar);border-style:solid}
+.clave.sel .sym,.clave.sel .nm{color:var(--ambar)}
+
+.par{display:flex;gap:7px;margin-bottom:8px}
+.campo{flex:1}
+.lab{font-size:9.5px;color:var(--dim);font-weight:700;margin-bottom:3px;text-transform:uppercase}
+.lab.v{color:var(--verde-l)}.lab.a{color:var(--ambar)}
+.val-inp{width:100%;padding:9px 10px;background:var(--surf);border:1px solid var(--line);
+  border-radius:8px;color:var(--txt);font-size:13.5px;font-family:inherit}
+.val-inp.v{border-color:var(--verde);background:#0E1F1A}
+.val-inp.a{border-color:var(--ambar);background:#221c12}
+.par3{display:flex;gap:5px;margin-bottom:8px}
+.par3 .campo{flex:1}
+
+/* boton X para limpiar campos */
+.wrapX{position:relative}
+.wrapX .inp,.wrapX .val-inp{padding-right:34px}
+.btnX{position:absolute;right:5px;top:50%;transform:translateY(-50%);width:24px;height:24px;
+  border-radius:6px;border:1px solid #7A2426;background:#2a1214;color:#FFC9CA;font-size:12px;
+  font-weight:700;cursor:pointer;padding:0;line-height:1;z-index:5}
+
+/* sugerencias del buscador */
+.sugBox{display:none;background:var(--surf);border:1px solid var(--line);border-radius:9px;
+  margin-bottom:6px;max-height:150px;overflow-y:auto}
+.sugBox.on{display:block}
+.sugIt{padding:8px 10px;border-bottom:1px solid var(--line);font-size:11.5px;cursor:pointer}
+.sugIt:last-child{border:none}
+.sugIt b{color:var(--verde-l)}
+.sugIt.nueva{background:var(--ambar-d);color:var(--ambar);font-weight:700}
+
+/* ayuda de claves de excepcion */
+.claveHelp{margin-top:6px;padding:8px 10px;background:var(--surf2);border-left:3px solid var(--line);
+  border-radius:0 7px 7px 0;font-size:10.5px;color:var(--dim);line-height:1.5}
+.claveHelp.on{background:var(--ambar-d);border-left-color:var(--ambar);color:#FBD9A0}
+
+/* info de filtro/buscador2 */
+.filtroInfo{font-size:10px;color:var(--dim);margin-bottom:6px}
+.filtroInfo.on{color:var(--verde-l);font-weight:600}
+
+/* popup modal */
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:999;display:none;
+  align-items:center;justify-content:center;padding:16px}
+.modal.on{display:flex}
+.modalBox{width:100%;max-width:340px;background:#12161c;border-radius:14px;padding:16px;
+  max-height:85vh;overflow-y:auto}
+.modalBox.rojo{border:2px solid var(--rojo)}
+.modalBox.amb{border:2px solid var(--ambar)}
+.mTit{font-size:14px;font-weight:800;margin-bottom:8px}
+.mTit.rojo{color:#FFC9CA}.mTit.amb{color:var(--ambar)}
+.mTxt{font-size:12px;color:var(--dim);line-height:1.55;margin-bottom:10px}
+.mReg{background:var(--surf);border-radius:9px;padding:10px;margin-bottom:8px;font-size:11.5px;line-height:1.6}
+.mReg b{color:var(--txt)}
+.mReg .et{color:var(--dim);font-size:10px}
+.mBtns{display:flex;gap:7px;margin-top:10px}
+.mBtn{flex:1;padding:11px;border:none;border-radius:9px;font-size:12.5px;font-weight:800;
+  cursor:pointer;font-family:inherit}
+.mBtn.ok{background:var(--verde);color:#04241B}
+.mBtn.no{background:var(--surf2);color:var(--dim);border:1px solid var(--line)}
+.mBtn.peligro{background:#7A2426;color:#FFC9CA}
+
+/* cotejo BDC — check / no coincide */
+.cot{padding:5px 8px;border-radius:0 0 7px 7px;background:var(--morado-d);border:1px solid #3A3479;
+  border-top:none;font-size:10px;display:flex;align-items:center;gap:6px}
+.cot .tag2{font-size:8px;font-weight:800;color:#B9B4F0;background:#332C6B;padding:2px 5px;border-radius:4px;flex-shrink:0}
+.cot .val{color:#CFCBF5;font-weight:600}
+.cot.bad{background:var(--rojo-d);border-color:#7A2426}
+.cot.bad .tag2{background:#7A2426;color:#FFC9CA}
+.cot.bad .val{color:#FFC9CA}
+.cot.bad::after{content:"NO COINCIDE";margin-left:auto;font-size:7.5px;font-weight:800;color:#FF9B9D}
+.cot.ok::after{content:"✓";margin-left:auto;color:var(--verde-l);font-weight:800}
+
+/* decoder de serie */
+.ff-decoder{border-radius:8px;padding:7px 9px;background:linear-gradient(135deg,#0E2019,#122A20);
+  border:1px solid var(--verde-d);display:flex;align-items:center;gap:8px;margin-top:5px}
+.ff-decoder .yr{font-family:var(--mono);font-size:16px;font-weight:800;color:var(--verde-l)}
+.ff-decoder .meta{font-size:8.5px;color:#7FCFAE;line-height:1.3}
+.ff-decoder .meta b{color:var(--verde-l)}
+
+/* alertas condicionales — solo ocupan espacio si hay algo que avisar */
+.alertzone{max-height:0;overflow:hidden;transition:max-height .3s ease}
+.alertzone.on{max-height:200px;margin-top:8px}
+.alert{padding:8px 10px;border-radius:8px;font-size:10.5px;line-height:1.45;margin-top:6px;display:flex;gap:6px}
+.alert .ic{font-size:12px;flex-shrink:0}
+.alert.rojo{background:var(--rojo-d);border-left:3px solid var(--rojo);color:#FFC9CA}
+.alert.amb{background:var(--ambar-d);border-left:3px solid var(--ambar);color:#FBD9A0}
+.alert.ok{background:var(--verde-d);border-left:3px solid var(--verde);color:var(--verde-l)}
+
+.btn{width:100%;padding:13px;border:none;border-radius:11px;background:var(--verde);
+  color:#04241B;font-size:15px;font-weight:800;margin-top:10px}
+
+.medida{position:fixed;bottom:8px;right:8px;font-size:9px;color:#3d4a5a;font-family:var(--mono)}
+</style>
+</head>
+<body>
+<div class="marco">
+
+  <div class="top">
+    <div>
+      <div class="logo">GRINC <b>IF·BDC</b></div>
+      <div class="sub">38422 · STARBUCKS HSBC · PB</div>
+    </div>
+    <div class="net">EN LÍNEA</div>
+  </div>
+
+  <div class="body">
+
+    <!-- Tarjetas 1 y 2: colapsadas, van primero -->
+    <div class="togglebar" id="togglebarExtra">
+      <div class="tglcard" id="t1btn" onclick="toggle(1)">📄 TARJETA 1<span class="n">FP·FF·BDC</span></div>
+      <div class="tglcard" id="t2btn" onclick="toggle(2)">📄 TARJETA 2<span class="n">COMPLEMENT.</span></div>
+    </div>
+
+    <!-- boton aparte, SOLO controla avisos, no toca T1/T2 -->
+    <button id="btnAvisos" onclick="toggleAvisos()" style="width:100%;padding:8px;margin-bottom:8px;
+      background:var(--ambar-d);border:1.5px solid var(--ambar);border-radius:9px;color:var(--ambar);
+      font-size:11px;font-weight:800;cursor:pointer;font-family:inherit">⚠ AVISOS: 2 activos — toca para ocultar</button>
+
+    <div class="panelExtra" id="panel1">
+      <div class="grid2">
+        <div class="mini"><div class="l">Descripción</div><div class="v">MAQUINA DE HIELO CON CONTENEDOR</div></div>
+        <div class="mini"><div class="l">Marca</div><div class="v">ICE-O-MATIC <span style="color:var(--rojo);font-size:9px">(BDC: MANITOWOC)</span></div></div>
+      </div>
+      <div class="fp-par">
+        <div class="fp-box"><div class="l">Fecha Puesta</div><div class="v">ALTAS</div></div>
+        <div class="ff-box"><div class="l">FF fabricación (serie)</div><div class="v">2018</div></div>
+      </div>
+      <div class="grid2" style="margin-top:8px">
+        <div class="mini"><div class="l">Dep/Comifa</div><div class="v">70</div></div>
+        <div class="mini"><div class="l">Activo Fijo</div><div class="v vacio">—</div></div>
+      </div>
+      <div style="font-size:8.5px;color:var(--dim);font-weight:800;text-transform:uppercase;margin:6px 0 4px;border-top:1px solid var(--line);padding-top:6px">BDC Origen</div>
+      <div class="grid2">
+        <div class="mini"><div class="l">Unidades BDC</div><div class="v">1</div></div>
+        <div class="mini"><div class="l">BDC_O_IF</div><div class="v">BDC</div></div>
+      </div>
+      <div class="mini"><div class="l">Descripcion BDC</div><div class="v">MAQUINA DE HIELO CON CONTENEDOR</div></div>
+      <div class="mini"><div class="l">Alsea Ant</div><div class="v vacio">—</div></div>
+      <div class="grid2" style="margin-top:4px;border-top:1px solid var(--line);padding-top:6px">
+        <div class="mini"><div class="l">Lote</div><div class="v vacio">—</div></div>
+        <div class="mini"><div class="l">Status</div><div class="v">NORMAL</div></div>
+      </div>
+    </div>
+
+    <div class="panelExtra" id="panel2">
+      <div class="grid2">
+        <div class="mini"><div class="l">Desc Homo</div><div class="v">MAQUINA DE HIELO CON CONTENEDOR</div></div>
+        <div class="mini"><div class="l">Marca Homo</div><div class="v">ICE-O-MATIC</div></div>
+        <div class="mini"><div class="l">Mod Homo</div><div class="v">ICEU220</div></div>
+        <div class="mini"><div class="l">Serie Homo</div><div class="v">S18043277910</div></div>
+        <div class="mini"><div class="l">Activo</div><div class="v vacio">—</div></div>
+        <div class="mini"><div class="l">Resp Inventario</div><div class="v">EDGAR MORENO</div></div>
+      </div>
+      <div class="grid2" style="margin-top:4px;border-top:1px solid var(--line);padding-top:6px">
+        <div class="mini"><div class="l">RIG</div><div class="v vacio">—</div></div>
+        <div class="mini"><div class="l">Regpuro</div><div class="v" style="color:#CFCBF5">🔒 X</div></div>
+      </div>
+      <div class="lockbox">🔒 REGPURO trae X — no editable, no se amarra a otra marca</div>
+    </div>
+
+    <!-- filtro + buscadores, despues de las tarjetas -->
+    <div class="eyebrow" style="margin-top:0">Filtro</div>
+    <div class="chips">
+      <div class="chip" onclick="tocarChip(this)">BDC</div><div class="chip" onclick="tocarChip(this)">IF</div><div class="chip" onclick="tocarChip(this)">IFPP</div>
+      <div class="chip" onclick="tocarChip(this)">ALTAS</div><div class="chip" onclick="tocarChip(this)">COMOD</div><div class="chip sel" onclick="tocarChip(this)">TODOS</div>
+    </div>
+    <div class="filtroInfo" id="filtroInfo">Mostrando: TODOS los registros</div>
+    <div class="wrapX">
+      <input class="inp" id="busc1" placeholder="Buscador principal: INV ACT · DESC · MARCA · SERIE..." oninput="sugerir(this.value)">
+      <button class="btnX" onclick="limpiarCampo('busc1')">✕</button>
+    </div>
+    <div id="sugBox" class="sugBox"></div>
+    <div class="wrapX">
+      <input class="inp sec" id="busc2" placeholder="Buscador secundario: filtra dentro del resultado..." oninput="filtrar2(this.value)">
+      <button class="btnX" onclick="limpiarCampo('busc2')">✕</button>
+    </div>
+    <div class="filtroInfo" id="res2"></div>
+
+    <!-- ===== ZONA DE CAPTURA — la que tiene prioridad de espacio ===== -->
+    <div class="eyebrow">Excepciones — toca si aplica</div>
+    <div class="claves">
+      <div class="clave" data-k="%" onclick="tocarClave(this)"><span class="sym">%</span><span class="nm">S/ACC</span></div>
+      <div class="clave" data-k="@" onclick="tocarClave(this)"><span class="sym">@</span><span class="nm">N/LOC</span></div>
+      <div class="clave" data-k="#" onclick="tocarClave(this)"><span class="sym">#</span><span class="nm">OBS</span></div>
+      <div class="clave" data-k="CD" onclick="tocarClave(this)"><span class="sym">CD</span><span class="nm">COMOD</span></div>
+      <div class="clave" data-k="MR" onclick="tocarClave(this)"><span class="sym">MR</span><span class="nm">RELEV</span></div>
+    </div>
+    <div class="claveHelp" id="claveHelp">Sin excepción. El activo se localizó y se captura normal.</div>
+
+    <div class="eyebrow">Dato del inventario en sitio</div>
+
+    <div class="par"><div class="campo"><div class="lab a">Ubicacion Int</div>
+      <div class="wrapX">
+        <input class="val-inp a" id="ubiSel" list="listaUbi" value="BARRA DE PREPARACION" placeholder="Escribe o elige...">
+        <datalist id="listaUbi">
+          <option>ALMACEN DE SECOS</option>
+          <option>AREA DE LAVADO</option>
+          <option>AZOTEA</option>
+          <option>BAÑO CLIENTES</option>
+          <option>BARRA DE PREPARACION</option>
+          <option>BAR</option>
+          <option>BODEGA</option>
+          <option>CAMARA DE REFRIGERACION</option>
+          <option>COCINA</option>
+          <option>COMEDOR EMPLEADOS</option>
+          <option>MOSTRADOR PUNTO DE VENTA</option>
+          <option>OFICINA GERENTE</option>
+        </datalist>
+        <button class="btnX" onclick="limpiarUbi()">✕</button>
+      </div>
+    </div></div>
+
+    <div class="par"><div class="campo"><div class="lab">Unidades_IF</div><input class="val-inp" value=""></div></div>
+
+    <div class="par">
+      <div class="campo"><div class="lab a">Inv Act</div><input class="val-inp a" id="invAct" type="text" value="878787878" oninput="chkDup('invAct')"></div>
+      <div class="campo"><div class="lab">Inv Ant</div><input class="val-inp" id="invAnt" type="text" value=""></div>
+    </div>
+
+    <div class="par"><div class="campo"><div class="lab v">Descripcion_Homo</div>
+      <input class="val-inp v" style="border-radius:8px 8px 0 0" value="MAQUINA DE HIELO CON CONTENEDOR">
+      <div class="cot ok"><span class="tag2">BDC</span><span class="val">MAQUINA DE HIELO CON CONTENEDOR</span></div>
+    </div></div>
+
+    <div class="par">
+      <div class="campo"><div class="lab">Marca</div>
+        <input class="val-inp" style="border-radius:8px 8px 0 0" id="inpMarca" value="ICE-O-MATIC">
+        <div class="cot bad" id="cotMarca"><span class="tag2">BDC</span><span class="val">MANITOWOC</span></div>
+      </div>
+      <div class="campo"><div class="lab">Modelo</div><input class="val-inp" value="ICEU220"></div>
+    </div>
+
+    <div class="par">
+      <div class="campo"><div class="lab v">Serie</div>
+        <input class="val-inp v" id="serie" value="S18043277910" oninput="chkDup('serie')">
+        <div class="ff-decoder">
+          <span class="yr">2018</span>
+          <span class="meta">Fabricación <b>abr 2018</b> · 8 años<br>ICE-O-MATIC · dígitos 1-4</span>
+        </div>
+      </div>
+      <div class="campo"><div class="lab">Color</div><input class="val-inp" value="GRIS"></div>
+    </div>
+
+    <div class="par3">
+      <div class="campo"><div class="lab">Alto</div><input class="val-inp" value="60"></div>
+      <div class="campo"><div class="lab">Ancho</div><input class="val-inp" value="60"></div>
+      <div class="campo"><div class="lab">Largo</div><input class="val-inp" value="80"></div>
+    </div>
+
+    <div class="par"><div class="campo"><div class="lab a">Edo Fis — % DEP</div>
+      <select class="val-inp a" id="edoFis" onchange="validarDep()">
+        <option value="">— selecciona % —</option>
+        <option value="0">0 — en caja, sin usar</option>
+        <option value="10">10 — nuevo</option>
+        <option value="20">20 — menos de 2 años</option>
+        <option value="30">30 — de 2 a 4 años</option>
+        <option value="40">40 — de 2 a 4 años</option>
+        <option value="50">50 — de 5 a 10 años</option>
+        <option value="60">60 — de 5 a 10 años</option>
+        <option value="70" selected>70 — de 11 a 15 años</option>
+        <option value="80">80 — de 11 a 15 años</option>
+        <option value="90">90 — de 16 a 25 años</option>
+        <option value="100">100 — obsoleto / chatarra</option>
+        <option value="PENDIENTE">PENDIENTE — por definir</option>
+      </select>
+    </div></div>
+    <div class="par"><div class="campo"><div class="lab">Comentarios</div><input class="val-inp" value="" placeholder="Observaciones..."></div></div>
+
+    <div class="alertzone on" id="zonaAlertas">
+      <div class="alert amb"><span class="ic">▲</span><span>Contabilidad trae <b>70%</b> y capturaste <b>80%</b>. Verifica antes de guardar.</span></div>
+      <div class="alert rojo"><span class="ic">■</span><span><b>Marca distinta al BDC.</b> Corrige o deja nota en comentarios.</span></div>
+    </div>
+    <div class="alertzone" id="zonaOk">
+      <div class="alert ok"><span class="ic">●</span><span>Sin discrepancias contra la base contable.</span></div>
+    </div>
+
+    <button class="tglcard" style="margin-top:8px;width:100%" onclick="toggleAlerta()">🔧 DEMO: cambiar caso alertas</button>
+
+    <button class="btn">Guardar</button>
+
+  </div>
+</div>
+<!-- POPUP DUPLICADO -->
+<div class="modal" id="mDup">
+  <div class="modalBox rojo">
+    <div class="mTit rojo">⛔ DUPLICADO DETECTADO</div>
+    <div class="mTxt" id="dupMotivo"></div>
+    <div class="mReg" id="dupReg"></div>
+    <div class="mTxt" style="color:#FFC9CA">Corrige la etiqueta o la serie antes de guardar.</div>
+    <div class="mBtns">
+      <button class="mBtn no" onclick="cerrar('mDup')">Entendido — corregir</button>
+    </div>
+  </div>
+</div>
+
+<!-- POPUP CONFIRMAR %DEP EXTREMO -->
+<div class="modal" id="mDep">
+  <div class="modalBox amb">
+    <div class="mTit amb">▲ CONFIRMA EL ESTADO FÍSICO</div>
+    <div class="mTxt" id="depTxt"></div>
+    <div class="mReg" id="depCruce"></div>
+    <div class="mBtns">
+      <button class="mBtn no" onclick="cancelarDep()">No, corregir</button>
+      <button class="mBtn ok" onclick="cerrar('mDep')">Sí, confirmo</button>
+    </div>
+  </div>
+</div>
+
+<!-- POPUP DESCRIPCION NUEVA -->
+<div class="modal" id="mNueva">
+  <div class="modalBox amb">
+    <div class="mTit amb">⚠ DESCRIPCIÓN NO ESTÁ EN CATÁLOGO</div>
+    <div class="mTxt">Esta descripción no existe en el catálogo madre. Requiere autorización de mesa de control antes de darse de alta.</div>
+    <div class="mReg" id="nuevaReg"></div>
+    <div class="mTxt">Envía la solicitud a mesa de control:</div>
+    <div class="mBtns">
+      <button class="mBtn ok" onclick="enviarAlta('whats')">📱 WhatsApp</button>
+      <button class="mBtn ok" style="background:#4A5BB8;color:#fff" onclick="enviarAlta('teams')">👥 Teams</button>
+    </div>
+    <div class="mBtns">
+      <button class="mBtn ok" style="background:#1D9E75" onclick="enviarAlta('correo')">✉ Correo</button>
+      <button class="mBtn no" onclick="cerrar('mNueva')">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<div class="medida" id="medida"></div>
+
+<script>
+function toggle(n){
+  var p = document.getElementById('panel'+n);
+  var b = document.getElementById('t'+n+'btn');
+  var otro = n===1?2:1;
+  document.getElementById('panel'+otro).classList.remove('on');
+  document.getElementById('t'+otro+'btn').classList.remove('on');
+  p.classList.toggle('on');
+  b.classList.toggle('on');
+}
+function medida(){
+  document.getElementById('medida').textContent = window.innerWidth+' x '+window.innerHeight+'px';
+}
+window.addEventListener('resize', medida); medida();
+
+/* ===== CATALOGO DE PRUEBA (en la app real viene de LABASE) ===== */
+var CATALOGO = [
+  'MAQUINA DE HIELO CON CONTENEDOR','REFRIGERADOR VERTICAL 2 PUERTAS',
+  'MESA REFRIGERADA MAKE LINE','HORNO DE MICROONDAS','LAVAMANOS 1 TARJA',
+  'ANAQUEL METALICO ESMALTADO','BASCULA DIGITAL GRAMERA','CAMPANA DE EXTRACCION',
+  'LOCKER METALICO','BOTE DE BASURA METALICO CIRCULAR','MESA DE CORTE',
+  'CAFETERA PRECOLADORA DOBLE','LICUADORA FRAPERA','TERMINAL PIN PAD'
+];
+/* registros ya capturados, para detectar duplicados */
+var CAPTURADOS = [
+  { ia:'878787878', s:'S18043277910', d:'MAQUINA DE HIELO CON CONTENEDOR', u:'BARRA DE PREPARACION', q:'EDGAR MORENO' },
+  { ia:'A-1024',    s:'VM0145X8821', d:'LICUADORA FRAPERA', u:'BAR', q:'KAY LOPEZ' }
+];
+var FF_ANIO = 2018; // viene del decoder de serie
+
+/* ===== 1. BOTON X PARA LIMPIAR ===== */
+function limpiarCampo(id){ var e=document.getElementById(id); e.value=''; e.focus(); if(id==='busc1') cerrarSug(); }
+function limpiarUbi(){ document.getElementById('ubiSel').value=''; }
+function ubiCambio(){}
+
+/* ===== BUSCADOR CONTRA CATALOGO ===== */
+function cerrarSug(){ document.getElementById('sugBox').classList.remove('on'); }
+function sugerir(q){
+  var box=document.getElementById('sugBox');
+  q=(q||'').trim().toUpperCase();
+  if(q.length<2){ cerrarSug(); return; }
+  var hits=CATALOGO.filter(function(x){ return x.indexOf(q)>=0; });
+  var h='';
+  hits.slice(0,6).forEach(function(x){
+    h+='<div class="sugIt" onclick="elegirDesc(\''+x+'\')"><b>'+x+'</b></div>';
+  });
+  if(hits.length===0){
+    h='<div class="sugIt nueva" onclick="descNueva(\''+q.replace(/'/g,'')+'\')">⚠ "'+q+'" no está en catálogo — toca para solicitar alta</div>';
+  }
+  box.innerHTML=h; box.classList.add('on');
+}
+function elegirDesc(x){ document.getElementById('busc1').value=x; cerrarSug(); }
+
+/* ===== 3. EXCEPCIONES FUNCIONALES — se plasman en su campo ===== */
+var CLAVES_TXT = {
+  '%':{ campo:'invAct', dep:'100', t:'<b>NO SE TUVO ACCESO.</b> Se escribe <b>%</b> en INV ACT. Queda fuera de alcance y la depreciación se fija en 100.' },
+  '@':{ campo:'invAct', dep:'100', t:'<b>NO SE LOCALIZÓ.</b> Se escribe <b>@</b> en INV ACT. Es faltante real contra contabilidad. Depreciación 100.' },
+  '#':{ campo:'invAct', dep:'',    t:'<b>OBSOLETO.</b> Se escribe <b>#</b> en INV ACT. No cuenta como pendiente en la auditoría.' },
+  'CD':{ campo:'invAct', dep:'100', t:'<b>COMODATO.</b> Se escribe <b>CD</b> en INV ACT. Sale en la cédula de proveedor, no en la de ALSEA.' },
+  'MR':{ campo:'ubiSel', dep:'',    t:'<b>MAYOR RELEVANCIA.</b> Se marca <b>MR</b> en la UBICACIÓN. Se reporta aparte para gerencia.' }
+};
+var VAL_PREVIO = {};
+function tocarClave(el){
+  var k=el.getAttribute('data-k');
+  var cfg=CLAVES_TXT[k];
+  var yaEstaba=el.classList.contains('sel');
+  var help=document.getElementById('claveHelp');
+
+  // apagar todas y restaurar valores previos
+  document.querySelectorAll('.clave').forEach(function(c){
+    if(c.classList.contains('sel')){
+      var kv=c.getAttribute('data-k');
+      var cv=CLAVES_TXT[kv];
+      if(VAL_PREVIO[cv.campo]!==undefined){
+        document.getElementById(cv.campo).value=VAL_PREVIO[cv.campo];
+        delete VAL_PREVIO[cv.campo];
+      }
+      if(cv.dep && VAL_PREVIO.edoFis!==undefined){
+        document.getElementById('edoFis').value=VAL_PREVIO.edoFis;
+        delete VAL_PREVIO.edoFis;
+      }
+    }
+    c.classList.remove('sel');
+  });
+
+  if(yaEstaba){
+    help.className='claveHelp';
+    help.innerHTML='Sin excepción. El activo se localizó y se captura normal.';
+    return;
+  }
+
+  el.classList.add('sel');
+  help.className='claveHelp on';
+  help.innerHTML=cfg.t;
+
+  // guardar lo que habia y escribir la clave en su campo
+  var campo=document.getElementById(cfg.campo);
+  if(VAL_PREVIO[cfg.campo]===undefined) VAL_PREVIO[cfg.campo]=campo.value;
+  if(cfg.campo==='ubiSel'){
+    campo.value = (VAL_PREVIO[cfg.campo]||'') + ' [MR]';
+  } else {
+    campo.value = k;
+  }
+  if(cfg.dep){
+    var ef=document.getElementById('edoFis');
+    if(VAL_PREVIO.edoFis===undefined) VAL_PREVIO.edoFis=ef.value;
+    ef.value=cfg.dep;
+  }
+}
+
+/* ===== FILTRO POR CHIPS ===== */
+function tocarChip(el){
+  document.querySelectorAll('.chip').forEach(function(c){ c.classList.remove('sel'); });
+  el.classList.add('sel');
+  var f=el.textContent.trim();
+  var info=document.getElementById('filtroInfo');
+  var textos={
+    'BDC':'Solo registros que vienen de la base contable',
+    'IF':'Solo inventario físico confirmado',
+    'IFPP':'Solo inventario físico primera pasada',
+    'ALTAS':'Solo activos dados de alta en sitio',
+    'COMOD':'Solo equipos en comodato',
+    'TODOS':'TODOS los registros'
+  };
+  info.textContent='Mostrando: '+(textos[f]||f);
+  info.className='filtroInfo on';
+}
+
+/* ===== BUSCADOR 2 ===== */
+function filtrar2(q){
+  var r=document.getElementById('res2');
+  q=(q||'').trim().toUpperCase();
+  if(!q){ r.textContent=''; r.className='filtroInfo'; return; }
+  var hits=CATALOGO.filter(function(x){ return x.indexOf(q)>=0; });
+  r.textContent='Filtro secundario "'+q+'": '+hits.length+' coincidencia(s)';
+  r.className='filtroInfo on';
+}
+
+/* ===== 5. DUPLICADOS ===== */
+function chkDup(campo){
+  var v=document.getElementById(campo).value.trim().toUpperCase();
+  if(v.length<3) return;
+  var enc=null, motivo='';
+  CAPTURADOS.forEach(function(r){
+    if(campo==='invAct' && String(r.ia).toUpperCase()===v){ enc=r; motivo='Ya existe un activo capturado con la <b>etiqueta '+v+'</b>.'; }
+    if(campo==='serie'  && String(r.s).toUpperCase()===v){ enc=r; motivo='Ya existe un activo capturado con la <b>serie '+v+'</b>.'; }
+  });
+  if(enc){
+    document.getElementById('dupMotivo').innerHTML=motivo;
+    document.getElementById('dupReg').innerHTML=
+      '<span class="et">DESCRIPCIÓN</span><br><b>'+enc.d+'</b><br>'+
+      '<span class="et">INV ACT</span> '+enc.ia+' · <span class="et">SERIE</span> '+enc.s+'<br>'+
+      '<span class="et">UBICACIÓN</span> '+enc.u+'<br>'+
+      '<span class="et">CAPTURÓ</span> '+enc.q;
+    abrir('mDup');
+  }
+}
+
+/* ===== 10. VALIDACION %DEP (opcion C) ===== */
+var depAnterior='70';
+function validarDep(){
+  var v=document.getElementById('edoFis').value;
+  var edad=new Date().getFullYear()-FF_ANIO;
+  var extremos={ '0':'EN CAJA, SIN USAR', '10':'NUEVO', '100':'OBSOLETO / CHATARRA' };
+  var pedirConf=false, txt='', cruce='';
+
+  if(extremos[v]){
+    pedirConf=true;
+    txt='Marcaste <b>'+v+'%</b> = <b>'+extremos[v]+'</b>. ¿Confirmas que el equipo realmente está así?';
+  }
+  // cruce con fecha de fabricacion
+  if(v!=='' && v!=='PENDIENTE' && FF_ANIO){
+    var n=parseInt(v,10);
+    if(edad>=5 && n<=20){
+      pedirConf=true;
+      cruce='<span class="et">CRUCE CON LA SERIE</span><br>La serie indica fabricación en <b>'+FF_ANIO+'</b> — el equipo tiene <b>'+edad+' años</b>.<br>Un equipo de esa edad normalmente no es '+v+'%.';
+      if(!txt) txt='El % que marcaste no cuadra con la antigüedad del equipo.';
+    } else if(edad<=2 && n>=70){
+      pedirConf=true;
+      cruce='<span class="et">CRUCE CON LA SERIE</span><br>La serie indica fabricación en <b>'+FF_ANIO+'</b> — solo <b>'+edad+' año(s)</b>.<br>Un equipo tan reciente normalmente no es '+v+'%.';
+      if(!txt) txt='El % que marcaste no cuadra con la antigüedad del equipo.';
+    }
+  }
+  if(pedirConf){
+    document.getElementById('depTxt').innerHTML=txt;
+    document.getElementById('depCruce').innerHTML=cruce||'<span class="et">Sin datos de fabricación para cruzar.</span>';
+    abrir('mDep');
+  } else { depAnterior=v; }
+}
+function cancelarDep(){ document.getElementById('edoFis').value=depAnterior; cerrar('mDep'); }
+
+/* ===== 8. DESCRIPCION NUEVA ===== */
+var DESC_PEND='';
+function descNueva(txt){
+  DESC_PEND=txt;
+  cerrarSug();
+  document.getElementById('nuevaReg').innerHTML=
+    '<span class="et">DESCRIPCIÓN SOLICITADA</span><br><b>'+txt+'</b><br>'+
+    '<span class="et">TIENDA</span> 38422 · STARBUCKS HSBC<br>'+
+    '<span class="et">INVENTARISTA</span> EDGAR MORENO<br>'+
+    '<span class="et">ESTADO</span> POR AUTORIZAR';
+  abrir('mNueva');
+}
+function enviarAlta(via){
+  var msg='SOLICITUD DE ALTA NUEVA — GRINC IF·BDC\n\n'+
+    'Descripción: '+DESC_PEND+'\n'+
+    'Tienda: 38422 STARBUCKS HSBC\n'+
+    'Inventarista: EDGAR MORENO\n'+
+    'Marca: '+(document.getElementById('inpMarca')||{value:''}).value+'\n'+
+    'Serie: '+(document.getElementById('serie')||{value:''}).value+'\n\n'+
+    'Se requiere autorización de mesa de control.';
+  if(via==='whats') window.open('https://wa.me/?text='+encodeURIComponent(msg),'_blank');
+  else if(via==='teams') window.open('https://teams.microsoft.com/l/chat/0/0?users=&message='+encodeURIComponent(msg),'_blank');
+  else window.open('mailto:?subject='+encodeURIComponent('ALTA NUEVA — IF·BDC 38422')+'&body='+encodeURIComponent(msg),'_blank');
+  cerrar('mNueva');
+}
+
+/* ===== helpers modal ===== */
+function abrir(id){ document.getElementById(id).classList.add('on'); }
+function cerrar(id){ document.getElementById(id).classList.remove('on'); }
+
+var conDiscrepancia = true;
+var avisosOcultos = false;
+
+function toggleAvisos(){
+  avisosOcultos = !avisosOcultos;
+  var btn = document.getElementById('btnAvisos');
+  var zA = document.getElementById('zonaAlertas');
+  var zO = document.getElementById('zonaOk');
+  if (avisosOcultos){
+    zA.classList.remove('on'); zO.classList.remove('on');
+    btn.textContent = '⚠ AVISOS: 2 activos — toca para mostrar';
+  } else {
+    pintarAlertas();
+  }
+}
+function pintarAlertas(){
+  var zA = document.getElementById('zonaAlertas');
+  var zO = document.getElementById('zonaOk');
+  var btn = document.getElementById('btnAvisos');
+  if (avisosOcultos) return;
+  if (conDiscrepancia){
+    zA.classList.add('on'); zO.classList.remove('on');
+    btn.textContent = '⚠ AVISOS: 2 activos — toca para ocultar';
+  } else {
+    zA.classList.remove('on'); zO.classList.add('on');
+    btn.textContent = '✓ AVISOS: sin problemas — toca para ocultar';
+  }
+}
+function toggleAlerta(){
+  conDiscrepancia = !conDiscrepancia;
+  var cot = document.getElementById('cotMarca');
+  var inp = document.getElementById('inpMarca');
+  if (conDiscrepancia){
+    cot.className='cot bad'; cot.innerHTML='<span class="tag2">BDC</span><span class="val">MANITOWOC</span>';
+  } else {
+    cot.className='cot ok'; cot.innerHTML='<span class="tag2">BDC</span><span class="val">ICE-O-MATIC</span>';
+  }
+  inp.value='ICE-O-MATIC';
+  pintarAlertas();
+}
+pintarAlertas();
+</script>
+</body>
+</html>
