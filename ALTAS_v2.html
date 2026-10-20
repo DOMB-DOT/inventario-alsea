@@ -76,7 +76,7 @@ html,body{background:#05080B;color:var(--txt);
 
 .toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:var(--surf2);
   border:1px solid var(--line);color:var(--txt);padding:11px 16px;border-radius:12px;font-size:13px;
-  font-weight:700;opacity:0;transition:.25s;z-index:60;max-width:360px;text-align:center}
+  font-weight:700;opacity:0;transition:.25s;z-index:60;max-width:360px;text-align:center;pointer-events:none}
 .toast.on{opacity:1}
 .toast.ok{border-color:var(--verde);color:var(--verde-l)}
 .toast.err{border-color:var(--rojo);color:var(--rojo-l)}
@@ -110,6 +110,32 @@ datalist{color:#000}
 .fotoIt .tag.nube{background:var(--verde-d);color:var(--verde-l)}
 .fotoIt .tag.nueva{background:var(--ambar-d);color:var(--ambar-l)}
 .fotosNota{font-size:10px;color:var(--dim);margin-top:6px}
+
+/* ===== DESPLEGABLES EDITABLES ===== */
+.cinp{padding-right:40px}
+.cbtn{position:absolute;right:6px;top:50%;transform:translateY(-50%);width:30px;height:30px;border-radius:8px;
+  background:var(--surf2);border:1px solid var(--line);color:var(--verde-l);font-size:14px;cursor:pointer}
+.cbox{position:relative;z-index:15;max-height:220px}
+.cbox .sugIt{padding:11px}
+.cbox .sugIt small{color:var(--dim);font-size:10px;margin-left:4px}
+
+.alertaDep{font-size:11px;background:var(--ambar-d);border:1px solid var(--ambar);color:var(--ambar-l);
+  border-radius:8px;padding:8px 10px;margin:-2px 0 10px;display:none}
+.alertaDep.on{display:block}
+
+/* ===== POPUP ===== */
+.modalFondo{position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:80;display:none;align-items:center;justify-content:center;padding:18px}
+.modalFondo.on{display:flex}
+.modalCaja{background:var(--surf);border:1px solid var(--line);border-radius:14px;padding:16px;width:100%;max-width:370px}
+.modalTit{font-size:15px;font-weight:800;margin-bottom:10px}
+.modalTit.err{color:var(--rojo-l)} .modalTit.avi{color:var(--ambar-l)} .modalTit.ok{color:var(--verde-l)}
+.modalTxt{font-size:13px;color:var(--txt);margin-bottom:14px}
+.modalTxt ul{padding-left:18px} .modalTxt li{margin-bottom:5px}
+.modalTxt .det{font-size:11px;color:var(--dim);margin-top:8px;word-break:break-word}
+.modalBtns{display:flex;gap:8px}
+.modalBtns button{flex:1;padding:12px;border-radius:10px;font-weight:800;font-size:13px;font-family:inherit;cursor:pointer;
+  border:1px solid var(--line);background:var(--surf2);color:var(--txt)}
+.modalBtns button.pri{background:var(--verde);color:#04150E;border-color:var(--verde)}
 </style>
 </head>
 <body>
@@ -199,16 +225,35 @@ datalist{color:#000}
       </div>
 
       <div class="row">
-        <div class="campo"><div class="lab">Edo Fís</div><input class="inp" id="edoFis" placeholder="BUENO / REGULAR..."></div>
-        <div class="campo"><div class="lab">% Dep</div><input class="inp" id="dep" placeholder="0 a 100" inputmode="numeric"></div>
+        <div class="campo">
+          <div class="lab">Edo Fís</div>
+          <div class="rel">
+            <input class="inp cinp" id="edoFis" placeholder="Elige o escribe" autocomplete="off"
+              onfocus="comboAbre('edoFis')" oninput="comboAbre('edoFis');revisaCoherencia()" onblur="comboCierraLuego('edoFis')">
+            <button class="cbtn" type="button" onmousedown="event.preventDefault();comboToggle('edoFis')">▾</button>
+          </div>
+          <div class="sugBox cbox" id="cb_edoFis"></div>
+        </div>
+        <div class="campo">
+          <div class="lab">% Dep</div>
+          <div class="rel">
+            <input class="inp cinp" id="dep" placeholder="0 a 100" inputmode="numeric" autocomplete="off"
+              onfocus="comboAbre('dep')" oninput="comboAbre('dep');revisaCoherencia()" onblur="comboCierraLuego('dep')">
+            <button class="cbtn" type="button" onmousedown="event.preventDefault();comboToggle('dep')">▾</button>
+          </div>
+          <div class="sugBox cbox" id="cb_dep"></div>
+        </div>
       </div>
+      <div class="alertaDep" id="alertaDep"></div>
 
       <div class="campo">
         <div class="lab">Ubicación Int</div>
         <div class="rel">
-          <input class="inp" id="ubicacion" placeholder="BARRA / COCINA / BODEGA...">
-          <button class="xbtn" onclick="limpiar('ubicacion')">✕</button>
+          <input class="inp cinp" id="ubicacion" placeholder="Elige o escribe" autocomplete="off"
+            onfocus="comboAbre('ubicacion')" oninput="comboAbre('ubicacion')" onblur="comboCierraLuego('ubicacion')">
+          <button class="cbtn" type="button" onmousedown="event.preventDefault();comboToggle('ubicacion')">▾</button>
         </div>
+        <div class="sugBox cbox" id="cb_ubicacion"></div>
       </div>
 
       <div class="campo">
@@ -236,6 +281,15 @@ datalist{color:#000}
 
 <div class="toast" id="toast"></div>
 
+<!-- ===== POPUP de avisos ===== -->
+<div class="modalFondo" id="modal">
+  <div class="modalCaja">
+    <div class="modalTit" id="mTit"></div>
+    <div class="modalTxt" id="mTxt"></div>
+    <div class="modalBtns" id="mBtns"></div>
+  </div>
+</div>
+
 <script>
 /* ===== URLs de tus dos backends ===== */
 var TIENDA_URL = 'https://script.google.com/macros/s/AKfycbxRnuGYTnEXUA3A2V614sEbPjj5-Yjjtf8fvrXihbffv8sTqKBBsTr0ePCH4c4O1fsvCw/exec';
@@ -252,9 +306,13 @@ var BASE_LISTA=false;
 function jsonp(url, params, cb){
   var s=document.createElement('script');
   var name='cb'+Date.now()+Math.floor(Math.random()*10000);
-  window[name]=function(d){ try{cb(d);}finally{ delete window[name]; s.remove(); } };
+  var hecho=false;
+  /* si el servidor no contesta en 30 s, avisa en vez de quedarse colgado */
+  var tmo=setTimeout(function(){ if(hecho) return; hecho=true; window[name]=function(){}; s.remove();
+    cb({ok:false,mensaje:'El servidor no respondió (30 s). Revisa la señal o la implementación de Apps Script.'}); },30000);
+  window[name]=function(d){ if(hecho) return; hecho=true; clearTimeout(tmo); try{cb(d);}finally{ delete window[name]; s.remove(); } };
   var q=Object.keys(params).map(function(k){return encodeURIComponent(k)+'='+encodeURIComponent(params[k]);}).join('&');
-  s.onerror=function(){ delete window[name]; s.remove(); cb({ok:false,mensaje:'Sin conexión'}); };
+  s.onerror=function(){ if(hecho) return; hecho=true; clearTimeout(tmo); delete window[name]; s.remove(); cb({ok:false,mensaje:'Sin conexión con el servidor'}); };
   s.src=url+'?'+q+'&callback='+name;
   document.body.appendChild(s);
 }
@@ -271,6 +329,7 @@ window.onload=function(){
     col.innerHTML=(d.colores||[]).map(function(x){return '<option value="'+x+'">';}).join('');
   });
   cargarBase();
+  if(AUTO10 && !val('dep')) document.getElementById('dep').value='10';
 };
 
 /* ===== descarga LABASE una sola vez y la deja lista para buscar local ===== */
@@ -372,32 +431,59 @@ function limpiar(id){var e=document.getElementById(id);e.value='';e.focus();}
 
 /* ===== guardar ===== */
 function val(id){return document.getElementById(id).value.trim();}
-function guardar(){
-  var inv=val('inventarista');
-  var desc=val('descripcion');
-  if(!inv){ toast('Escribe el inventarista','err'); return; }
-  if(!val('invAct')){ toast('Falta Inv Act','err'); return; }
-  if(!desc){ toast('Falta la descripción','err'); return; }
 
+/* PASO 1: revisa lo que falta y avisa con popup */
+function guardar(){
+  var bloq=[], avis=[];
+  if(!val('inventarista')) bloq.push(['inventarista','Inventarista']);
+  if(!val('invAct'))       bloq.push(['invAct','Inv Act']);
+  if(!val('descripcion'))  bloq.push(['descripcion','Descripción']);
+  if(totalFotos()<FOTOS_MIN) bloq.push(['','Fotos: llevas '+totalFotos()+', mínimo '+FOTOS_MIN]);
+
+  if(!val('serie'))     avis.push(['serie','Serie']);
+  if(!val('edoFis'))    avis.push(['edoFis','Edo Fís']);
+  if(val('dep')==='')   avis.push(['dep','% Dep']);
+  if(!val('ubicacion')) avis.push(['ubicacion','Ubicación Int']);
+  var coh=textoCoherencia();
+  if(coh) avis.push(['dep',coh]);
+
+  if(bloq.length){
+    modal('err','⛔ Faltan datos obligatorios',
+      '<ul>'+bloq.map(function(x){return '<li>'+x[1]+'</li>';}).join('')+'</ul>'+
+      (avis.length?'<div class="det">También revisa: '+avis.map(function(x){return x[1];}).join(' · ')+'</div>':''),
+      [{t:'CORREGIR',pri:true,fn:function(){ enfoca(bloq); }}]);
+    return;
+  }
+  if(avis.length){
+    modal('avi','⚠ Revisa antes de guardar',
+      '<ul>'+avis.map(function(x){return '<li>'+x[1]+(x[1].length<20?' — vacío':'')+'</li>';}).join('')+'</ul>',
+      [{t:'CORREGIR',fn:function(){ enfoca(avis); }},{t:'GUARDAR ASÍ',pri:true,fn:guardarYa}]);
+    return;
+  }
+  guardarYa();
+}
+function enfoca(lista){
+  for(var i=0;i<lista.length;i++){ if(lista[i][0]){ var e=document.getElementById(lista[i][0]); if(e){ e.focus(); e.scrollIntoView({block:'center'}); } return; } }
+}
+
+/* PASO 2: guarda de verdad */
+function guardarYa(){
   var datos={
-    inventarista:inv, modo:(MODO==='nueva'?'ALTA NUEVA':'BASE'),
-    invAct:val('invAct'), invAnt:val('invAnt'), descripcion:desc,
+    inventarista:val('inventarista'), modo:(MODO==='nueva'?'ALTA NUEVA':'BASE'),
+    invAct:val('invAct'), invAnt:val('invAnt'), descripcion:val('descripcion'),
     marca:val('marca'), modelo:val('modelo'), serie:val('serie'), color:val('color'),
     alto:val('alto'), ancho:val('ancho'), largo:val('largo'),
     edoFis:val('edoFis'), dep:val('dep'), ubicacion:val('ubicacion'),
     clave:val('clave'), comentarios:val('comentarios')
   };
-
-  if(totalFotos()<FOTOS_MIN){ toast('Faltan fotos: mínimo '+FOTOS_MIN+' por activo','err'); return; }
-
   var g=document.getElementById('btnGuardar'); g.disabled=true;
 
   /* si el alta ya se guardó y solo fallaron las fotos: reintenta SOLO las fotos (no duplica el alta) */
   if(ALTA_SIN_FOTOS===datos.invAct){
-    subirFotos(datos.invAct, datos.descripcion, function(okF){
+    subirFotos(datos.invAct, datos.descripcion, function(okF,msgF){
       g.disabled=false;
       if(okF){ ALTA_SIN_FOTOS=''; toast('✔ Fotos subidas','ok'); limpiarTarjeta(); }
-      else toast('Siguen fallando las fotos. Revisa la señal y vuelve a guardar.','err');
+      else modal('err','⛔ Siguen fallando las fotos','El alta ya está guardada. Revisa la señal y presiona GUARDAR otra vez (solo se suben las fotos).<div class="det">'+msgF+'</div>',[{t:'ENTENDIDO',pri:true}]);
     });
     return;
   }
@@ -406,26 +492,126 @@ function guardar(){
 
   /* 1) siempre guarda en la tienda */
   jsonp(TIENDA_URL,{accion:'guardarAlta',datos:JSON.stringify(datos)},function(r){
-    if(!r||!r.ok){ g.disabled=false; toast('Error al guardar en tienda','err'); return; }
+    if(!r||!r.ok){
+      g.disabled=false;
+      modal('err','⛔ No se guardó el alta','No llegó a la hoja de la tienda.<div class="det">'+((r&&r.mensaje)||'sin detalle')+'</div>',[{t:'ENTENDIDO',pri:true}]);
+      return;
+    }
     ALTA_SIN_FOTOS=datos.invAct;   // se limpia cuando las fotos suben bien
+    recuerdaUbic(datos.ubicacion);
 
     /* 2) sube las fotos nuevas (si hay) */
-    subirFotos(datos.invAct, datos.descripcion, function(okF){
+    subirFotos(datos.invAct, datos.descripcion, function(okF,msgF){
       if(okF) ALTA_SIN_FOTOS='';
-      var msgF = okF ? '' : ' — OJO: fallaron las fotos, presiona GUARDAR otra vez';
+      var fin=function(okMesa,msgMesa){
+        g.disabled=false;
+        if(okF && okMesa){ toast(MODO==='nueva'?'✔ Alta guardada y enviada a mesa':'✔ Alta guardada','ok'); limpiarTarjeta(); return; }
+        var t='El alta SÍ quedó guardada en la tienda.<ul>';
+        if(!okF) t+='<li>Fallaron las fotos: presiona GUARDAR otra vez (solo se suben las fotos).<div class="det">'+msgF+'</div></li>';
+        if(!okMesa) t+='<li>Falló el envío a mesa de control.<div class="det">'+msgMesa+'</div></li>';
+        modal('avi','⚠ Guardado a medias',t+'</ul>',[{t:'ENTENDIDO',pri:true}]);
+      };
       if(MODO==='nueva'){
         /* 3) además la manda a mesa de control */
         var pend=Object.assign({tienda:TIENDA_NOMBRE, via:'APP'}, datos);
         jsonp(DATA_URL,{accion:'nuevaAltaPendiente',datos:JSON.stringify(pend)},function(r2){
-          g.disabled=false;
-          if(r2&&r2.ok){ toast('✔ Alta guardada y enviada a mesa'+msgF, okF?'ok':'err'); if(okF) limpiarTarjeta(); }
-          else{ toast('Guardó en tienda, pero falló el envío a mesa'+msgF,'err'); }
+          fin(!!(r2&&r2.ok),(r2&&r2.mensaje)||'sin detalle');
         });
-      }else{
-        g.disabled=false; toast('✔ Alta guardada'+msgF, okF?'ok':'err'); if(okF) limpiarTarjeta();
-      }
+      }else fin(true,'');
     });
   });
+}
+
+/* ===== POPUP ===== */
+function modal(tipo,titulo,html,botones){
+  var t=document.getElementById('mTit'); t.textContent=titulo; t.className='modalTit '+(tipo||'');
+  document.getElementById('mTxt').innerHTML=html;
+  var b=document.getElementById('mBtns'); b.innerHTML='';
+  (botones||[{t:'OK',pri:true}]).forEach(function(x){
+    var el=document.createElement('button'); el.type='button'; el.textContent=x.t; if(x.pri) el.className='pri';
+    el.onclick=function(){ cierraModal(); if(x.fn) x.fn(); };
+    b.appendChild(el);
+  });
+  document.getElementById('modal').classList.add('on');
+}
+function cierraModal(){ document.getElementById('modal').classList.remove('on'); }
+
+/* =========================================================
+   DESPLEGABLES EDITABLES: Edo Fís, % Dep, Ubicación Int
+   (se elige de la lista o se escribe a mano)
+   ========================================================= */
+var EDO_FIS=['EN CAJA','NUEVO','BUENO','REGULAR','MALO','OBSOLETO','INSERVIBLE'];
+var DEP_OPC=[
+  ['0','EN CAJA · sin uso'],['10','hasta 2 años'],['20','2 a 4 años'],['30','4 a 6 años'],
+  ['40','6 a 8 años'],['50','8 a 10 años'],['60','10 a 12 años'],['70','12 a 14 años'],
+  ['80','14 a 16 años'],['90','OBSOLETO · más de 16 años'],['100','INSERVIBLE']];
+/* rango de %DEP que "cuadra" con cada Edo Fís (fuera de rango = alerta, no bloquea) */
+var RANGO_DEP={'EN CAJA':[0,0],'NUEVO':[0,20],'BUENO':[20,40],'REGULAR':[40,60],
+  'MALO':[60,80],'OBSOLETO':[90,90],'INSERVIBLE':[100,100]};
+var UBIC_BASE=['ACCESO','ALMACEN','AREA DE REPARTO','AZOTEA','BARRA','BODEGA','CAJA','CAMARA DE CONGELACION',
+  'CAMARA DE REFRIGERACION','COCINA','COMEDOR','CUARTO DE MAQUINAS','ESTACIONAMIENTO','EXTERIOR','FACHADA',
+  'GERENCIA','LAVALOZA','OFICINA','PASILLO','PATIO DE SERVICIO','PREPARACION','SANITARIOS','SITE',
+  'TERRAZA','VESTIDOR'];
+
+function itemsCombo(id){
+  if(id==='edoFis') return EDO_FIS.map(function(x){return {v:x,t:x};});
+  if(id==='dep') return DEP_OPC.map(function(x){return {v:x[0],t:x[0]+'%',s:x[1]};});
+  if(id==='ubicacion'){
+    var l=UBIC_BASE.slice(), r=[];
+    try{ r=JSON.parse(localStorage.getItem('IFBDC_UBIC')||'[]'); }catch(e){}
+    r.forEach(function(x){ if(l.indexOf(x)===-1) l.push(x); });
+    l.sort();
+    return l.map(function(x){return {v:x,t:x};});
+  }
+  return [];
+}
+function comboAbre(id, todo){
+  var q=todo?'':val(id).toLowerCase();
+  var it=itemsCombo(id).filter(function(x){ return !q || (x.t+' '+(x.s||'')).toLowerCase().indexOf(q)!==-1; });
+  if(id==='dep' && q && !todo) it=itemsCombo(id);   // en %DEP siempre muestra las 11 opciones
+  var box=document.getElementById('cb_'+id);
+  if(!it.length){ box.classList.remove('on'); return; }
+  box.innerHTML=it.map(function(x){
+    return '<div class="sugIt" onmousedown="event.preventDefault();comboElige(\''+id+'\',\''+String(x.v).replace(/'/g,"\\'")+'\')">'+
+      '<b>'+x.t+'</b>'+(x.s?'<small>'+x.s+'</small>':'')+'</div>';
+  }).join('');
+  box.classList.add('on');
+}
+function comboToggle(id){
+  var box=document.getElementById('cb_'+id);
+  if(box.classList.contains('on')) box.classList.remove('on');
+  else { comboAbre(id,true); document.getElementById(id).focus(); }
+}
+function comboElige(id,v){
+  document.getElementById(id).value=v;
+  document.getElementById('cb_'+id).classList.remove('on');
+  revisaCoherencia();
+}
+function comboCierraLuego(id){
+  setTimeout(function(){ document.getElementById('cb_'+id).classList.remove('on'); },180);
+}
+function recuerdaUbic(u){
+  u=String(u||'').trim().toUpperCase(); if(!u || UBIC_BASE.indexOf(u)!==-1) return;
+  try{ var r=JSON.parse(localStorage.getItem('IFBDC_UBIC')||'[]'); if(r.indexOf(u)===-1){ r.push(u); localStorage.setItem('IFBDC_UBIC',JSON.stringify(r)); } }catch(e){}
+}
+
+/* alerta si el %DEP no cuadra con el Edo Fís (ej. OBSOLETO con 10%) */
+function textoCoherencia(){
+  var ef=val('edoFis').toUpperCase(), d=val('dep');
+  var rg=RANGO_DEP[ef];
+  if(!rg || d==='') return '';
+  var n=Number(d);
+  if(isNaN(n)) return '% Dep "'+d+'" no es un número';
+  if(n<0||n>100) return '% Dep debe ir de 0 a 100';
+  if(n<rg[0]||n>rg[1]){
+    var r=(rg[0]===rg[1])?(rg[0]+'%'):(rg[0]+'% a '+rg[1]+'%');
+    return ef+' con '+n+'% no cuadra (para '+ef+' lo normal es '+r+')';
+  }
+  return '';
+}
+function revisaCoherencia(){
+  var t=textoCoherencia(), a=document.getElementById('alertaDep');
+  a.textContent=t?('⚠ '+t):''; a.classList.toggle('on',!!t);
 }
 
 /* =========================================================
@@ -516,14 +702,14 @@ function borrarFotoNube(i){
 
 /* sube las FOTOS_NUEVAS por POST (las fotos no caben en JSONP) */
 function subirFotos(invAct, nombre, cb){
-  if(!FOTOS_NUEVAS.length){ cb(true); return; }
+  if(!FOTOS_NUEVAS.length){ cb(true,''); return; }
   toast('Subiendo '+FOTOS_NUEVAS.length+' foto(s)...','');
   var cuerpo=JSON.stringify({accion:'guardarFotos',
     datos:{invAct:invAct, nombre:nombre, modulo:'ALTAS', imagenes:FOTOS_NUEVAS}});
   fetch(TIENDA_URL,{method:'POST', body:cuerpo})
     .then(function(r){ return r.json(); })
-    .then(function(d){ cb(!!(d&&d.ok)); })
-    .catch(function(){ cb(false); });
+    .then(function(d){ cb(!!(d&&d.ok), (d&&d.mensaje)||''); })
+    .catch(function(e){ cb(false, 'Error al subir: '+String(e&&e.message||e)); });
 }
 
 function limpiarTarjeta(){
@@ -533,6 +719,7 @@ function limpiarTarjeta(){
   document.getElementById('busq').value='';
   document.getElementById('claveHelp').classList.remove('on');
   FOTOS_NUBE=[]; FOTOS_NUEVAS=[]; pintarFotos();
+  revisaCoherencia();
   document.getElementById('fotosNota').textContent='Escribe el Inv Act para ver si ya tiene fotos guardadas.';
   document.getElementById('invAct').focus();
 }
