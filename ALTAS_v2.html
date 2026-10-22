@@ -33,13 +33,18 @@ html,body{background:#05080B;color:var(--txt);
 .dot{width:14px;height:14px;border-radius:50%;background:var(--verde-l)}
 .tgl10.off .dot{background:var(--dim)}
 
-.lab{font-size:9.5px;color:var(--dim);font-weight:700;letter-spacing:.6px;
+.lab{font-size:9.5px;color:var(--txt);font-weight:700;letter-spacing:.6px;
   text-transform:uppercase;margin:0 0 4px 2px}
 .lab.v{color:var(--verde-l)}.lab.m{color:var(--morado-l)}
-.inp{width:100%;background:var(--surf);border:1px solid var(--line);border-radius:10px;
+.inp{width:100%;background:var(--surf);border:1px solid var(--morado);border-radius:10px;
   padding:11px 12px;color:var(--txt);font-size:14px;font-family:inherit}
 .inp:focus{outline:none;border-color:var(--verde)}
-.inp.v{border-color:var(--verde)} .inp.m{border-color:var(--morado)}
+.inp.v{border:2px solid var(--verde)} .inp.m{border-color:var(--morado)}
+
+/* ===== contornos por campo (pedido de DomB) ===== */
+#descripcion,#serie,#dep,#ubicacion{border:2px solid var(--verde)}
+#unidades,#tipoRIG{border:2px solid var(--ambar)}
+#edoFis{border:1px solid var(--ambar)}
 
 .modos{display:flex;gap:8px;margin:2px 0 14px}
 .modo{flex:1;padding:12px;border-radius:10px;text-align:center;font-weight:800;font-size:12px;
@@ -288,7 +293,7 @@ datalist{color:#000}
       <button class="campana" id="campana" type="button" onclick="abrirAvisos()">🔔<b id="campanaN">0</b></button>
       <div>
       <div class="net" id="net">EN LÍNEA</div>
-      <div class="ver">v29 · módulo altas</div>
+      <div class="ver">v29 · COLORES-3</div>
       </div>
     </div>
   </div>
