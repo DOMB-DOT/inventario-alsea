@@ -162,6 +162,12 @@ html,body{width:100%;height:100%;background:#05080B;color:var(--txt);
 .btn{width:100%;padding:13px;border:none;border-radius:11px;background:var(--verde);
   color:#04241B;font-size:15px;font-weight:800;margin-top:10px}
 
+.colaBar{display:flex;align-items:center;gap:8px;font-size:11px;font-weight:800;padding:7px 12px;
+  border-bottom:1px solid var(--line);cursor:pointer;background:var(--surf);color:var(--dim)}
+.colaBar .pt{width:8px;height:8px;border-radius:50%;background:var(--verde);flex:0 0 8px}
+.colaBar.sube{color:var(--ambar)} .colaBar.sube .pt{background:var(--ambar);animation:lat 1s infinite}
+.colaBar.err{color:var(--rojo);background:var(--rojo-d)} .colaBar.err .pt{background:var(--rojo)}
+@keyframes lat{50%{opacity:.25}}
 .medida{position:fixed;bottom:8px;right:8px;font-size:9px;color:#3d4a5a;font-family:var(--mono)}
 </style>
 </head>
@@ -176,6 +182,10 @@ html,body{width:100%;height:100%;background:#05080B;color:var(--txt);
     <div class="net">EN LÍNEA</div>
   </div>
 
+  <div class="colaBar" id="colaBar" onclick="verCola()">
+    <span class="pt"></span><span id="colaTxt">\u2714 Todo guardado en la nube</span>
+  </div>
+
   <div class="body">
 
     <!-- Tarjetas 1 y 2: colapsadas, van primero -->
@@ -187,46 +197,46 @@ html,body{width:100%;height:100%;background:#05080B;color:var(--txt);
     <!-- boton aparte, SOLO controla avisos, no toca T1/T2 -->
     <button id="btnAvisos" onclick="toggleAvisos()" style="width:100%;padding:8px;margin-bottom:8px;
       background:var(--ambar-d);border:1.5px solid var(--ambar);border-radius:9px;color:var(--ambar);
-      font-size:11px;font-weight:800;cursor:pointer;font-family:inherit">⚠ AVISOS: 2 activos — toca para ocultar</button>
+      font-size:11px;font-weight:800;cursor:pointer;font-family:inherit">✓ AVISOS: sin problemas — toca para ocultar</button>
 
     <div class="panelExtra" id="panel1">
       <div class="grid2">
-        <div class="mini"><div class="l">Descripción</div><div class="v">MAQUINA DE HIELO CON CONTENEDOR</div></div>
-        <div class="mini"><div class="l">Marca</div><div class="v">ICE-O-MATIC <span style="color:var(--rojo);font-size:9px">(BDC: MANITOWOC)</span></div></div>
+        <div class="mini"><div class="l">Descripción</div><div class="v" id="p1_desc">—</div></div>
+        <div class="mini"><div class="l">Marca</div><div class="v" id="p1_marca">—</div></div>
       </div>
       <div class="fp-par">
-        <div class="fp-box"><div class="l">Fecha Puesta</div><div class="v">ALTAS</div></div>
-        <div class="ff-box"><div class="l">FF fabricación (serie)</div><div class="v">2018</div></div>
+        <div class="fp-box"><div class="l">Fecha Puesta</div><div class="v" id="p1_fp">—</div></div>
+        <div class="ff-box"><div class="l">FF fabricación (serie)</div><div class="v" id="p1_ff">—</div></div>
       </div>
       <div class="grid2" style="margin-top:8px">
-        <div class="mini"><div class="l">Dep/Comifa</div><div class="v">70</div></div>
-        <div class="mini"><div class="l">Activo Fijo</div><div class="v vacio">—</div></div>
+        <div class="mini"><div class="l">Dep/Comifa</div><div class="v" id="p1_dc">—</div></div>
+        <div class="mini"><div class="l">Activo Fijo</div><div class="v vacio" id="p1_af">—</div></div>
       </div>
       <div style="font-size:8.5px;color:var(--dim);font-weight:800;text-transform:uppercase;margin:6px 0 4px;border-top:1px solid var(--line);padding-top:6px">BDC Origen</div>
       <div class="grid2">
-        <div class="mini"><div class="l">Unidades BDC</div><div class="v">1</div></div>
-        <div class="mini"><div class="l">BDC_O_IF</div><div class="v">BDC</div></div>
+        <div class="mini"><div class="l">Unidades BDC</div><div class="v" id="p1_ub">—</div></div>
+        <div class="mini"><div class="l">BDC_O_IF</div><div class="v" id="p1_boi">—</div></div>
       </div>
-      <div class="mini"><div class="l">Descripcion BDC</div><div class="v">MAQUINA DE HIELO CON CONTENEDOR</div></div>
-      <div class="mini"><div class="l">Alsea Ant</div><div class="v vacio">—</div></div>
+      <div class="mini"><div class="l">Descripcion BDC</div><div class="v" id="p1_dbdc">—</div></div>
+      <div class="mini"><div class="l">Alsea Ant</div><div class="v vacio" id="p1_aa">—</div></div>
       <div class="grid2" style="margin-top:4px;border-top:1px solid var(--line);padding-top:6px">
-        <div class="mini"><div class="l">Lote</div><div class="v vacio">—</div></div>
-        <div class="mini"><div class="l">Status</div><div class="v">NORMAL</div></div>
+        <div class="mini"><div class="l">Lote</div><div class="v vacio" id="p1_lo">—</div></div>
+        <div class="mini"><div class="l">Status</div><div class="v" id="p1_st">—</div></div>
       </div>
     </div>
 
     <div class="panelExtra" id="panel2">
       <div class="grid2">
-        <div class="mini"><div class="l">Desc Homo</div><div class="v">MAQUINA DE HIELO CON CONTENEDOR</div></div>
-        <div class="mini"><div class="l">Marca Homo</div><div class="v">ICE-O-MATIC</div></div>
-        <div class="mini"><div class="l">Mod Homo</div><div class="v">ICEU220</div></div>
-        <div class="mini"><div class="l">Serie Homo</div><div class="v">S18043277910</div></div>
-        <div class="mini"><div class="l">Activo</div><div class="v vacio">—</div></div>
-        <div class="mini"><div class="l">Resp Inventario</div><div class="v">EDGAR MORENO</div></div>
+        <div class="mini"><div class="l">Desc Homo</div><div class="v" id="p2_dh">—</div></div>
+        <div class="mini"><div class="l">Marca Homo</div><div class="v" id="p2_mh">—</div></div>
+        <div class="mini"><div class="l">Mod Homo</div><div class="v" id="p2_moh">—</div></div>
+        <div class="mini"><div class="l">Serie Homo</div><div class="v" id="p2_sh">—</div></div>
+        <div class="mini"><div class="l">Activo</div><div class="v vacio" id="p2_act">—</div></div>
+        <div class="mini"><div class="l">Resp Inventario</div><div class="v" id="p2_ri">—</div></div>
       </div>
       <div class="grid2" style="margin-top:4px;border-top:1px solid var(--line);padding-top:6px">
-        <div class="mini"><div class="l">RIG</div><div class="v vacio">—</div></div>
-        <div class="mini"><div class="l">Regpuro</div><div class="v" style="color:#CFCBF5">🔒 X</div></div>
+        <div class="mini"><div class="l">RIG</div><div class="v vacio" id="p2_rig">—</div></div>
+        <div class="mini"><div class="l">Regpuro</div><div class="v" style="color:#CFCBF5" id="p2_rp">—</div></div>
       </div>
       <div class="lockbox">🔒 REGPURO trae X — no editable, no se amarra a otra marca</div>
     </div>
@@ -264,64 +274,51 @@ html,body{width:100%;height:100%;background:#05080B;color:var(--txt);
 
     <div class="par"><div class="campo"><div class="lab a">Ubicacion Int</div>
       <div class="wrapX">
-        <input class="val-inp a" id="ubiSel" list="listaUbi" value="BARRA DE PREPARACION" placeholder="Escribe o elige...">
-        <datalist id="listaUbi">
-          <option>ALMACEN DE SECOS</option>
-          <option>AREA DE LAVADO</option>
-          <option>AZOTEA</option>
-          <option>BAÑO CLIENTES</option>
-          <option>BARRA DE PREPARACION</option>
-          <option>BAR</option>
-          <option>BODEGA</option>
-          <option>CAMARA DE REFRIGERACION</option>
-          <option>COCINA</option>
-          <option>COMEDOR EMPLEADOS</option>
-          <option>MOSTRADOR PUNTO DE VENTA</option>
-          <option>OFICINA GERENTE</option>
-        </datalist>
+        <input class="val-inp a" id="ubiSel" list="listaUbi" value="" placeholder="Escribe o elige...">
+        <datalist id="listaUbi"></datalist>
         <button class="btnX" onclick="limpiarUbi()">✕</button>
       </div>
     </div></div>
 
-    <div class="par"><div class="campo"><div class="lab">Unidades_IF</div><input class="val-inp" value=""></div></div>
+    <div class="par"><div class="campo"><div class="lab">Unidades_IF</div><input class="val-inp" id="unidadesIF" value="" oninput="revisarAvisos()"></div></div>
 
     <div class="par">
-      <div class="campo"><div class="lab a">Inv Act</div><input class="val-inp a" id="invAct" type="text" value="878787878" oninput="chkDup('invAct')"></div>
+      <div class="campo"><div class="lab a">Inv Act</div><input class="val-inp a" id="invAct" type="text" value="" oninput="chkDup('invAct')"></div>
       <div class="campo"><div class="lab">Inv Ant</div><input class="val-inp" id="invAnt" type="text" value=""></div>
     </div>
 
     <div class="par"><div class="campo"><div class="lab v">Descripcion_Homo</div>
-      <input class="val-inp v" style="border-radius:8px 8px 0 0" value="MAQUINA DE HIELO CON CONTENEDOR">
-      <div class="cot ok"><span class="tag2">BDC</span><span class="val">MAQUINA DE HIELO CON CONTENEDOR</span></div>
+      <input class="val-inp v" style="border-radius:8px 8px 0 0" id="inpDesc" value="">
+      <div class="cot ok" id="cotDesc"><span class="tag2">BDC</span><span class="val" id="cotDescVal">—</span></div>
     </div></div>
 
     <div class="par">
       <div class="campo"><div class="lab">Marca</div>
-        <input class="val-inp" style="border-radius:8px 8px 0 0" id="inpMarca" value="ICE-O-MATIC">
-        <div class="cot bad" id="cotMarca"><span class="tag2">BDC</span><span class="val">MANITOWOC</span></div>
+        <input class="val-inp" style="border-radius:8px 8px 0 0" id="inpMarca" value="" oninput="cotejaMarca();revisarAvisos()">
+        <div class="cot bad" id="cotMarca"><span class="tag2">BDC</span><span class="val" id="cotMarcaVal">—</span></div>
       </div>
-      <div class="campo"><div class="lab">Modelo</div><input class="val-inp" value="ICEU220"></div>
+      <div class="campo"><div class="lab">Modelo</div><input class="val-inp" id="inpModelo" value=""></div>
     </div>
 
     <div class="par">
       <div class="campo"><div class="lab v">Serie</div>
-        <input class="val-inp v" id="serie" value="S18043277910" oninput="chkDup('serie')">
-        <div class="ff-decoder">
-          <span class="yr">2018</span>
-          <span class="meta">Fabricación <b>abr 2018</b> · 8 años<br>ICE-O-MATIC · dígitos 1-4</span>
+        <input class="val-inp v" id="serie" value="" oninput="chkDup('serie')">
+        <div class="ff-decoder" id="ffDecoder" style="display:none">
+          <span class="yr" id="ffYr">—</span>
+          <span class="meta" id="ffMeta">—</span>
         </div>
       </div>
-      <div class="campo"><div class="lab">Color</div><input class="val-inp" value="GRIS"></div>
+      <div class="campo"><div class="lab">Color</div><input class="val-inp" id="inpColor" value=""></div>
     </div>
 
     <div class="par3">
-      <div class="campo"><div class="lab">Alto</div><input class="val-inp" value="60"></div>
-      <div class="campo"><div class="lab">Ancho</div><input class="val-inp" value="60"></div>
-      <div class="campo"><div class="lab">Largo</div><input class="val-inp" value="80"></div>
+      <div class="campo"><div class="lab">Alto</div><input class="val-inp" id="inpAlto" value=""></div>
+      <div class="campo"><div class="lab">Ancho</div><input class="val-inp" id="inpAncho" value=""></div>
+      <div class="campo"><div class="lab">Largo</div><input class="val-inp" id="inpLargo" value=""></div>
     </div>
 
     <div class="par"><div class="campo"><div class="lab a">Edo Fis — % DEP</div>
-      <select class="val-inp a" id="edoFis" onchange="validarDep()">
+      <select class="val-inp a" id="edoFis" onchange="validarDep();revisarAvisos()">
         <option value="">— selecciona % —</option>
         <option value="0">0 — en caja, sin usar</option>
         <option value="10">10 — nuevo</option>
@@ -330,26 +327,21 @@ html,body{width:100%;height:100%;background:#05080B;color:var(--txt);
         <option value="40">40 — de 2 a 4 años</option>
         <option value="50">50 — de 5 a 10 años</option>
         <option value="60">60 — de 5 a 10 años</option>
-        <option value="70" selected>70 — de 11 a 15 años</option>
+        <option value="70">70 — de 11 a 15 años</option>
         <option value="80">80 — de 11 a 15 años</option>
         <option value="90">90 — de 16 a 25 años</option>
         <option value="100">100 — obsoleto / chatarra</option>
         <option value="PENDIENTE">PENDIENTE — por definir</option>
       </select>
     </div></div>
-    <div class="par"><div class="campo"><div class="lab">Comentarios</div><input class="val-inp" value="" placeholder="Observaciones..."></div></div>
+    <div class="par"><div class="campo"><div class="lab">Comentarios</div><input class="val-inp" id="inpComent" value="" placeholder="Observaciones..."></div></div>
 
-    <div class="alertzone on" id="zonaAlertas">
-      <div class="alert amb"><span class="ic">▲</span><span>Contabilidad trae <b>70%</b> y capturaste <b>80%</b>. Verifica antes de guardar.</span></div>
-      <div class="alert rojo"><span class="ic">■</span><span><b>Marca distinta al BDC.</b> Corrige o deja nota en comentarios.</span></div>
-    </div>
+    <div class="alertzone" id="zonaAlertas"></div>
     <div class="alertzone" id="zonaOk">
       <div class="alert ok"><span class="ic">●</span><span>Sin discrepancias contra la base contable.</span></div>
     </div>
 
-    <button class="tglcard" style="margin-top:8px;width:100%" onclick="toggleAlerta()">🔧 DEMO: cambiar caso alertas</button>
-
-    <button class="btn">Guardar</button>
+    <button class="btn" id="btnGuardar" onclick="guardar()">Guardar</button>
 
   </div>
 </div>
@@ -398,6 +390,8 @@ html,body{width:100%;height:100%;background:#05080B;color:var(--txt);
 </div>
 
 <div class="medida" id="medida"></div>
+<div id="toast" style="position:fixed;left:50%;transform:translateX(-50%);bottom:20px;z-index:95;
+  padding:11px 18px;border-radius:24px;font-size:12.5px;font-weight:700;display:none;max-width:90%"></div>
 
 <script>
 function toggle(n){
@@ -414,6 +408,271 @@ function medida(){
 }
 window.addEventListener('resize', medida); medida();
 
+/* =====================================================================
+   CONEXION REAL  -  BDC de la tienda + catalogos de GRINC_DATA
+   ===================================================================== */
+var TIENDA_URL = 'https://script.google.com/macros/s/AKfycbxRnuGYTnEXUA3A2V614sEbPjj5-Yjjtf8fvrXihbffv8sTqKBBsTr0ePCH4c4O1fsvCw/exec';
+var DATA_URL   = 'https://script.google.com/macros/s/AKfycbxFS7vAj-lwln6MjetjV-IVQ6uqEZPPqnwxy1W9f54OqjVeFtZhF57qTcyQuKdboYaF/exec';
+
+var BDC = [];          /* los renglones de la pestana IF_BDC */
+var FILA = null;       /* el renglon que se esta capturando */
+var FILTRO = 'TODOS';
+var CATM = { ubic:{}, tipos:{} };
+var MARCA_SEL = 'SB';  /* de momento fija; luego sale de DATOS FIJOS */
+
+function jsonp(url, params, cb){
+  var sc=document.createElement('script');
+  var name='cb'+Date.now()+Math.floor(Math.random()*10000);
+  var hecho=false;
+  var tmo=setTimeout(function(){ if(hecho) return; hecho=true; window[name]=function(){}; sc.remove();
+    cb({ok:false,mensaje:'El servidor no respondio (30 s).'}); },30000);
+  window[name]=function(d){ if(hecho) return; hecho=true; clearTimeout(tmo);
+    try{ cb(d); } finally { delete window[name]; sc.remove(); } };
+  var q=Object.keys(params).map(function(k){
+    return encodeURIComponent(k)+'='+encodeURIComponent(params[k]); }).join('&');
+  sc.onerror=function(){ if(hecho) return; hecho=true; clearTimeout(tmo);
+    delete window[name]; sc.remove(); cb({ok:false,mensaje:'Sin conexion'}); };
+  sc.src=url+'?'+q+'&callback='+name;
+  document.body.appendChild(sc);
+}
+function T(x){ return String(x===null||x===undefined?'':x).trim(); }
+function pon(id,v){ var e=document.getElementById(id); if(e) e.textContent = T(v)||'\u2014'; }
+function ponV(id,v){ var e=document.getElementById(id); if(e) e.value = T(v); }
+function val(id){ var e=document.getElementById(id); return e?T(e.value):''; }
+
+function cargarBDC(){
+  var info=document.getElementById('filtroInfo');
+  if(info) info.textContent='Bajando la BDC de la tienda\u2026';
+  jsonp(TIENDA_URL,{accion:'getIFBDC'},function(d){
+    if(!d||!d.ok){ if(info) info.textContent='No se pudo bajar la BDC: '+T(d&&d.mensaje); return; }
+    BDC = d.filas||[];
+    pintaFiltro();
+  });
+}
+function cargarCatMarca(){
+  jsonp(DATA_URL,{accion:'catalogosMarca'},function(d){
+    if(!d||!d.ok) return;
+    CATM={ubic:d.ubic||{}, tipos:d.tipos||{}};
+    pintaUbic();
+  });
+}
+function pintaUbic(){
+  var dl=document.getElementById('listaUbi'); if(!dl) return;
+  var l=(CATM.ubic && CATM.ubic[MARCA_SEL]) ? CATM.ubic[MARCA_SEL] : [];
+  var h='';
+  for(var i=0;i<l.length;i++) h+='<option>'+l[i]+'</option>';
+  dl.innerHTML=h;
+}
+function toast(t,c){
+  var e=document.getElementById('toast');
+  e.innerHTML=t;
+  e.style.display='block';
+  if(c==='err'){ e.style.background='#4A1416'; e.style.color='#F8A5A6'; e.style.border='1px solid #E2484A'; }
+  else { e.style.background='#0C5F45'; e.style.color='#6EE7B7'; e.style.border='1px solid #1FA97C'; }
+  clearTimeout(window._tt);
+  window._tt=setTimeout(function(){ e.style.display='none'; }, 3200);
+}
+
+/* =====================================================================
+   GUARDADO INSTANTANEO  -  guarda en el telefono y sube por detras
+   ===================================================================== */
+var COLA=[], DB=null, SUBIENDO=false, REINTENTO=null;
+
+function dbAbre(cb){
+  if(DB){ cb(DB); return; }
+  try{
+    var rq=indexedDB.open('IFBDC_COLA_IF',1);
+    rq.onupgradeneeded=function(){ rq.result.createObjectStore('cola',{keyPath:'id'}); };
+    rq.onsuccess=function(){ DB=rq.result; cb(DB); };
+    rq.onerror=function(){ cb(null); };
+  }catch(e){ cb(null); }
+}
+function dbGuarda(it){ dbAbre(function(db){ if(!db) return;
+  try{ db.transaction('cola','readwrite').objectStore('cola').put(it); }catch(e){} }); }
+function dbBorra(id){ dbAbre(function(db){ if(!db) return;
+  try{ db.transaction('cola','readwrite').objectStore('cola').delete(id); }catch(e){} }); }
+function colaCarga(cb){
+  dbAbre(function(db){
+    if(!db){ cb(); return; }
+    try{
+      var rq=db.transaction('cola','readonly').objectStore('cola').getAll();
+      rq.onsuccess=function(){ var l=rq.result||[];
+        l.sort(function(x,y){ return x.id<y.id?-1:1; }); COLA=l; cb(); };
+      rq.onerror=function(){ cb(); };
+    }catch(e){ cb(); }
+  });
+}
+function esFalloRed(msg){ return /conexi|respondi|network|failed|timeout/i.test(String(msg||'')); }
+
+function pintaCola(){
+  var bar=document.getElementById('colaBar'), txt=document.getElementById('colaTxt');
+  if(!bar) return;
+  var errs=0; for(var i=0;i<COLA.length;i++){ if(COLA[i].error) errs++; }
+  var pend=COLA.length-errs;
+  if(errs){ bar.className='colaBar err';
+    txt.textContent='\u26a0 '+errs+' con error'+(pend?' \u00b7 '+pend+' por subir':'')+' \u2014 toca para ver'; }
+  else if(pend){ bar.className='colaBar sube';
+    txt.textContent=(SUBIENDO?'\u2601 Subiendo\u2026 ':'\u2601 Esperando se\u00f1al\u2026 ')+pend+' por subir'; }
+  else { bar.className='colaBar'; txt.textContent='\u2714 Todo guardado en la nube'; }
+}
+function verCola(){
+  var errs=COLA.filter(function(x){return x.error;});
+  if(!COLA.length){ toast('No hay nada pendiente de subir'); return; }
+  if(errs.length){
+    toast('\u26a0 '+errs.length+' no se pudieron guardar:<br>'+String(errs[0].error).slice(0,90),'err');
+  } else {
+    toast(COLA.length+' captura(s) esperando se\u00f1al. Se suben solas.');
+  }
+}
+
+function procesaCola(){
+  if(SUBIENDO) return;
+  var it=null;
+  for(var i=0;i<COLA.length;i++){ if(!COLA[i].error){ it=COLA[i]; break; } }
+  if(!it){ pintaCola(); return; }
+  SUBIENDO=true; pintaCola();
+  jsonp(TIENDA_URL,{accion:'guardarCaptura',datos:JSON.stringify(it.datos)},function(r){
+    SUBIENDO=false;
+    if(r&&r.ok){
+      COLA=COLA.filter(function(x){ return x.id!==it.id; });
+      dbBorra(it.id); pintaCola(); procesaCola(); return;
+    }
+    var msg=String((r&&r.mensaje)||'sin conexi\u00f3n');
+    if(esFalloRed(msg)){
+      pintaCola();
+      clearTimeout(REINTENTO); REINTENTO=setTimeout(procesaCola,20000);
+    } else {
+      it.error=msg; dbGuarda(it); pintaCola(); procesaCola();
+    }
+  });
+}
+window.addEventListener('online',function(){ clearTimeout(REINTENTO); procesaCola(); });
+
+/* ===== GUARDAR: instantaneo en el telefono ===== */
+function guardar(){
+  if(!FILA){ toast('Primero busca y elige un activo de la BDC','err'); return; }
+  if(!val('invAct')){
+    toast('Falta el <b>INV ACT</b>. Sin \u00e9l no se guarda.','err');
+    var e=document.getElementById('invAct'); if(e) e.focus();
+    return;
+  }
+
+  var datos={
+    fila:         FILA.fila,
+    ubicacion:    val('ubiSel'),
+    unidades:     val('unidadesIF'),
+    invAct:       val('invAct'),
+    invAnt:       val('invAnt'),
+    descripcion:  val('inpDesc'),
+    marca:        val('inpMarca'),
+    modelo:       val('inpModelo'),
+    serie:        val('serie'),
+    color:        val('inpColor'),
+    alto:         val('inpAlto'),
+    ancho:        val('inpAncho'),
+    largo:        val('inpLargo'),
+    estadoFisico: val('edoFis'),
+    comentarios:  val('inpComent')
+  };
+
+  /* 1. el renglon queda al dia al instante, sin esperar a Google */
+  FILA.u=datos.ubicacion; FILA.ui=datos.unidades; FILA.ia=datos.invAct;
+  FILA.ian=datos.invAnt;  FILA.d=datos.descripcion; FILA.m=datos.marca;
+  FILA.mo=datos.modelo;   FILA.s=datos.serie;  FILA.c=datos.color;
+  FILA.al=datos.alto;     FILA.an=datos.ancho; FILA.la=datos.largo;
+  FILA.ef=datos.estadoFisico; FILA.co=datos.comentarios;
+
+  /* 2. si ese mismo renglon ya estaba en la cola sin subir, se reemplaza */
+  var reemplazado=false;
+  for(var i=0;i<COLA.length;i++){
+    if(!COLA[i].error && String(COLA[i].datos.fila)===String(datos.fila)){
+      COLA[i].datos=datos; dbGuarda(COLA[i]); reemplazado=true; break;
+    }
+  }
+  if(!reemplazado){
+    var it={ id:'q'+Date.now()+'_'+Math.floor(Math.random()*10000), datos:datos, error:'' };
+    COLA.push(it); dbGuarda(it);
+  }
+
+  toast('\u2713 Guardado \u00b7 rengl\u00f3n '+datos.fila+' \u2014 listo para el siguiente');
+  pintaCola();
+  procesaCola();
+  limpiaTarjeta();
+}
+
+/* deja la pantalla lista para buscar el siguiente activo */
+function limpiaTarjeta(){
+  FILA=null;
+  ['p1_desc','p1_marca','p1_fp','p1_ff','p1_dc','p1_af','p1_ub','p1_boi','p1_dbdc','p1_aa',
+   'p1_lo','p1_st','p2_dh','p2_mh','p2_moh','p2_sh','p2_act','p2_ri','p2_rig','p2_rp',
+   'cotDescVal','cotMarcaVal'].forEach(function(id){
+    var e=document.getElementById(id); if(e) e.textContent='\u2014';
+  });
+  ['ubiSel','unidadesIF','invAct','invAnt','inpDesc','inpMarca','inpModelo','serie',
+   'inpColor','inpAlto','inpAncho','inpLargo','inpComent','busc1','busc2'].forEach(function(id){
+    var e=document.getElementById(id); if(e) e.value='';
+  });
+  var sel=document.getElementById('edoFis'); if(sel) sel.value='';
+  var cm=document.getElementById('cotMarca'); if(cm) cm.className='cot ok';
+  var med=document.getElementById('medida'); if(med) med.classList.remove('on');
+  pintaFF();
+  cerrarSug();
+  revisarAvisos();
+  var b=document.getElementById('busc1'); if(b) b.focus();
+}
+
+function cotejaMarca(){
+  var cm=document.getElementById('cotMarca'); if(!cm||!FILA) return;
+  var igual = val('inpMarca').toUpperCase() === T(FILA.mh||FILA.m).toUpperCase();
+  cm.className = 'cot ' + (igual ? 'ok' : 'bad');
+}
+function pintaFiltro(){
+  var info=document.getElementById('filtroInfo'); if(!info) return;
+  info.textContent='Mostrando: '+FILTRO+' \u00b7 '+listaFiltrada().length+' de '+BDC.length+' registros';
+}
+function listaFiltrada(){
+  if(FILTRO==='TODOS') return BDC;
+  return BDC.filter(function(f){ return T(f.boi).toUpperCase()===FILTRO; });
+}
+
+/* ---- llena toda la pantalla con un renglon de la BDC ---- */
+function cargarFila(i){
+  var f=listaFiltrada()[i]; if(!f) return;
+  FILA=f;
+  pon('p1_desc', f.d); pon('p1_marca', f.m);
+  pon('p1_fp', f.fp);  pon('p1_ff', f.ff);
+  pon('p1_dc', f.dc);  pon('p1_af', f.af);
+  pon('p1_ub', f.ub);  pon('p1_boi', f.boi);
+  pon('p1_dbdc', f.dbdc); pon('p1_aa', f.aa);
+  pon('p1_lo', f.lo);  pon('p1_st', f.st);
+  pon('p2_dh', f.dh);  pon('p2_mh', f.mh);
+  pon('p2_moh', f.moh);pon('p2_sh', f.sh);
+  pon('p2_act', f.act);pon('p2_ri', f.ri);
+  pon('p2_rig', f.rig);pon('p2_rp', f.rp);
+
+  ponV('ubiSel', f.u);     ponV('unidadesIF', f.ui);
+  ponV('invAct', f.ia);    ponV('invAnt', f.ian);
+  ponV('inpDesc', f.d);    ponV('inpMarca', f.m);
+  ponV('inpModelo', f.mo); ponV('serie', f.s);
+  ponV('inpColor', f.c);   ponV('inpAlto', f.al);
+  ponV('inpAncho', f.an);  ponV('inpLargo', f.la);
+  ponV('inpComent', f.co);
+  var sel=document.getElementById('edoFis'); if(sel) sel.value=T(f.ef);
+
+  pon('cotDescVal', f.dbdc||f.d);
+  pon('cotMarcaVal', f.mh||f.m);
+  cotejaMarca();
+  cerrarSug();
+  pintaFF();
+  revisarAvisos();
+}
+
+window.addEventListener('load', function(){
+  cargarBDC();
+  cargarCatMarca();
+  colaCarga(function(){ pintaCola(); procesaCola(); });
+});
+
 /* ===== CATALOGO DE PRUEBA (en la app real viene de LABASE) ===== */
 var CATALOGO = [
   'MAQUINA DE HIELO CON CONTENEDOR','REFRIGERADOR VERTICAL 2 PUERTAS',
@@ -427,7 +686,24 @@ var CAPTURADOS = [
   { ia:'878787878', s:'S18043277910', d:'MAQUINA DE HIELO CON CONTENEDOR', u:'BARRA DE PREPARACION', q:'EDGAR MORENO' },
   { ia:'A-1024',    s:'VM0145X8821', d:'LICUADORA FRAPERA', u:'BAR', q:'KAY LOPEZ' }
 ];
-var FF_ANIO = 2018; // viene del decoder de serie
+var FF_ANIO = 0; // sale del renglon de la BDC (columna FF)
+
+/* pinta u oculta la cajita del ano de fabricacion segun el renglon */
+function pintaFF(){
+  var caja=document.getElementById('ffDecoder');
+  if(!caja) return;
+  var anio = FILA ? parseInt(T(FILA.ff),10) : 0;
+  if(!anio || anio < 1950 || anio > 2100){
+    FF_ANIO = 0; caja.style.display='none'; return;
+  }
+  FF_ANIO = anio;
+  var edad = (new Date()).getFullYear() - anio;
+  document.getElementById('ffYr').textContent = anio;
+  document.getElementById('ffMeta').innerHTML =
+    'Fabricaci\u00f3n <b>' + anio + '</b> \u00b7 ' + edad + ' a\u00f1o(s)<br>' +
+    (T(FILA.m) || T(FILA.mh) || '\u2014') + ' \u00b7 seg\u00fan la serie';
+  caja.style.display='';
+}
 
 /* ===== 1. BOTON X PARA LIMPIAR ===== */
 function limpiarCampo(id){ var e=document.getElementById(id); e.value=''; e.focus(); if(id==='busc1') cerrarSug(); }
@@ -440,14 +716,20 @@ function sugerir(q){
   var box=document.getElementById('sugBox');
   q=(q||'').trim().toUpperCase();
   if(q.length<2){ cerrarSug(); return; }
-  var hits=CATALOGO.filter(function(x){ return x.indexOf(q)>=0; });
-  var h='';
-  hits.slice(0,6).forEach(function(x){
-    h+='<div class="sugIt" onclick="elegirDesc(\''+x+'\')"><b>'+x+'</b></div>';
-  });
-  if(hits.length===0){
-    h='<div class="sugIt nueva" onclick="descNueva(\''+q.replace(/'/g,'')+'\')">⚠ "'+q+'" no está en catálogo — toca para solicitar alta</div>';
+  var pal=q.split(/\s+/).filter(function(x){return x;});
+  var lista=listaFiltrada(), h='', n=0;
+  for(var i=0;i<lista.length && n<8;i++){
+    var f=lista[i];
+    var txt=(T(f.ia)+' '+T(f.d)+' '+T(f.m)+' '+T(f.mo)+' '+T(f.s)+' '+T(f.u)).toUpperCase();
+    var todas=true;
+    for(var k=0;k<pal.length;k++){ if(txt.indexOf(pal[k])<0){ todas=false; break; } }
+    if(!todas) continue;
+    h+='<div class="sugIt" onclick="cargarFila('+i+')"><b>'+T(f.d)+'</b>'+
+       '<div style="font-size:10px;color:var(--dim);margin-top:2px">'+
+       T(f.m)+' \u00b7 '+T(f.mo)+' \u00b7 Serie '+(T(f.s)||'\u2014')+' \u00b7 INV '+(T(f.ia)||'\u2014')+'</div></div>';
+    n++;
   }
+  if(!n) h='<div class="sugIt nueva">No hay nada en la BDC con esa b\u00fasqueda.</div>';
   box.innerHTML=h; box.classList.add('on');
 }
 function elegirDesc(x){ document.getElementById('busc1').value=x; cerrarSug(); }
@@ -511,6 +793,8 @@ function tocarClave(el){
 
 /* ===== FILTRO POR CHIPS ===== */
 function tocarChip(el){
+  FILTRO = String(el.textContent||'TODOS').trim().toUpperCase();
+  setTimeout(pintaFiltro, 0);
   document.querySelectorAll('.chip').forEach(function(c){ c.classList.remove('sel'); });
   el.classList.add('sel');
   var f=el.textContent.trim();
@@ -620,8 +904,33 @@ function enviarAlta(via){
 function abrir(id){ document.getElementById(id).classList.add('on'); }
 function cerrar(id){ document.getElementById(id).classList.remove('on'); }
 
-var conDiscrepancia = true;
+var conDiscrepancia = false;
 var avisosOcultos = false;
+var AVISOS = [];
+
+/* revisa el renglon que se esta capturando contra lo que trae la BDC */
+function revisarAvisos(){
+  AVISOS = [];
+  if(FILA){
+    var depBDC = T(FILA.dc), depCap = val('edoFis');
+    if(depBDC && depCap && depCap !== 'PENDIENTE' && String(depBDC) !== String(depCap)){
+      AVISOS.push(['amb','\u25b2','Contabilidad trae <b>'+depBDC+'%</b> y capturaste <b>'+depCap+'%</b>. Verifica antes de guardar.']);
+    }
+    var mCap = val('inpMarca').toUpperCase(), mBDC = T(FILA.mh||FILA.m).toUpperCase();
+    if(mCap && mBDC && mCap !== mBDC){
+      AVISOS.push(['rojo','\u25a0','<b>Marca distinta al BDC.</b> La BDC trae <b>'+mBDC+'</b>. Corrige o deja nota en comentarios.']);
+    }
+    if(!val('invAct')){
+      AVISOS.push(['rojo','\u25a0','<b>Falta el INV ACT.</b> Sin \u00e9l no se puede guardar.']);
+    }
+    var ui = val('unidadesIF'), ub = T(FILA.ub);
+    if(ui && ub && String(ui) !== String(ub)){
+      AVISOS.push(['amb','\u25b2','La BDC trae <b>'+ub+'</b> unidad(es) y capturaste <b>'+ui+'</b>.']);
+    }
+  }
+  conDiscrepancia = AVISOS.length > 0;
+  pintarAlertas();
+}
 
 function toggleAvisos(){
   avisosOcultos = !avisosOcultos;
@@ -630,7 +939,7 @@ function toggleAvisos(){
   var zO = document.getElementById('zonaOk');
   if (avisosOcultos){
     zA.classList.remove('on'); zO.classList.remove('on');
-    btn.textContent = '⚠ AVISOS: 2 activos — toca para mostrar';
+    btn.textContent = '⚠ AVISOS: ' + AVISOS.length + ' — toca para mostrar';
   } else {
     pintarAlertas();
   }
@@ -639,28 +948,22 @@ function pintarAlertas(){
   var zA = document.getElementById('zonaAlertas');
   var zO = document.getElementById('zonaOk');
   var btn = document.getElementById('btnAvisos');
-  if (avisosOcultos) return;
+  var h = '';
+  for (var i = 0; i < AVISOS.length; i++){
+    h += '<div class="alert ' + AVISOS[i][0] + '"><span class="ic">' + AVISOS[i][1] +
+         '</span><span>' + AVISOS[i][2] + '</span></div>';
+  }
+  zA.innerHTML = h;
+  if (avisosOcultos){ zA.classList.remove('on'); zO.classList.remove('on'); return; }
   if (conDiscrepancia){
     zA.classList.add('on'); zO.classList.remove('on');
-    btn.textContent = '⚠ AVISOS: 2 activos — toca para ocultar';
+    btn.textContent = '⚠ AVISOS: ' + AVISOS.length + ' — toca para ocultar';
   } else {
     zA.classList.remove('on'); zO.classList.add('on');
     btn.textContent = '✓ AVISOS: sin problemas — toca para ocultar';
   }
 }
-function toggleAlerta(){
-  conDiscrepancia = !conDiscrepancia;
-  var cot = document.getElementById('cotMarca');
-  var inp = document.getElementById('inpMarca');
-  if (conDiscrepancia){
-    cot.className='cot bad'; cot.innerHTML='<span class="tag2">BDC</span><span class="val">MANITOWOC</span>';
-  } else {
-    cot.className='cot ok'; cot.innerHTML='<span class="tag2">BDC</span><span class="val">ICE-O-MATIC</span>';
-  }
-  inp.value='ICE-O-MATIC';
-  pintarAlertas();
-}
-pintarAlertas();
+revisarAvisos();
 </script>
 </body>
 </html>
