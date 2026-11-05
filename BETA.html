@@ -10,32 +10,63 @@ html,body{margin:0;height:100%;background:#05080B;color:#E8EDF2;font-family:-app
 #f{border:0;width:100%;height:100%;display:none}
 #tag{position:fixed;top:4px;left:50%;transform:translateX(-50%);background:#F0A32A;color:#1F1402;
   font-size:9px;font-weight:800;padding:2px 8px;border-radius:10px;z-index:9;pointer-events:none;display:none}
+#nueva{position:fixed;left:10px;right:10px;bottom:10px;z-index:20;display:none;
+  background:#0C5F45;border:2px solid #1FA97C;border-radius:12px;padding:11px 13px;
+  color:#fff;font-size:12px;font-weight:800;text-align:center;cursor:pointer;
+  box-shadow:0 8px 24px rgba(0,0,0,.5)}
 </style>
 </head>
 <body>
 <div id="msg">Cargando versión BETA...</div>
 <div id="tag"></div>
+<div id="nueva" onclick="location.reload()">Hay una versión nueva · toca para recargar</div>
 <iframe id="f" allow="camera; microphone"></iframe>
 <script>
 /* Carga la version BETA del modulo desde Drive (carpeta IFBDC_BETA)
-   via el Apps Script de la tienda. Uso: BETA.html?m=ALTAS  */
+   via el Apps Script de la tienda.  Uso: BETA.html?m=ALTAS
+
+   RAPIDO: lo que ya se bajo una vez se queda guardado en el telefono.
+   Al abrir, el modulo sale de inmediato de ahi, y por detras se revisa
+   si Drive tiene uno mas nuevo. Si lo hay, se guarda para la proxima y
+   sale el aviso de abajo. */
 var TIENDA_URL = 'https://script.google.com/macros/s/AKfycbxRnuGYTnEXUA3A2V614sEbPjj5-Yjjtf8fvrXihbffv8sTqKBBsTr0ePCH4c4O1fsvCw/exec';
 var m = (new URLSearchParams(location.search).get('m') || 'ALTAS').toUpperCase().replace(/[^A-Z0-9_]/g,'');
-var cbName = 'cbBeta' + Date.now();
+var CLAVE = 'IFBDC_MOD_' + m;
 var msg = document.getElementById('msg');
-window[cbName] = function(d){
-  if (!d || !d.ok) { msg.textContent = 'No se pudo cargar la BETA: ' + ((d && d.mensaje) || 'sin detalle'); return; }
-  var f = document.getElementById('f');
-  f.srcdoc = d.html;
+var f   = document.getElementById('f');
+var tag = document.getElementById('tag');
+var guardado = null, pintado = false;
+
+function pinta(html, version, deCache){
+  f.srcdoc = html;
   f.style.display = 'block';
   msg.style.display = 'none';
-  var t = document.getElementById('tag');
-  t.textContent = 'BETA ' + m + ' · ' + d.version;
-  t.style.display = 'block';
+  tag.textContent = 'BETA ' + m + ' · ' + version + (deCache ? ' · guardado' : '');
+  tag.style.display = 'block';
+  pintado = true;
+}
+
+/* 1) lo guardado se pinta YA, sin esperar al servidor */
+try {
+  guardado = JSON.parse(localStorage.getItem(CLAVE) || 'null');
+  if (guardado && guardado.html) { pinta(guardado.html, guardado.version || '?', true); }
+} catch (e) { guardado = null; }
+
+/* 2) y por detras se revisa si hay uno mas nuevo */
+var cbName = 'cbBeta' + Date.now();
+window[cbName] = function(d){
+  if (!d || !d.ok) {
+    if (!pintado) { msg.textContent = 'No se pudo cargar la BETA: ' + ((d && d.mensaje) || 'sin detalle'); }
+    return;
+  }
+  var igual = guardado && guardado.version === d.version && guardado.html === d.html;
+  try { localStorage.setItem(CLAVE, JSON.stringify({ version: d.version, html: d.html })); } catch (e) {}
+  if (!pintado) { pinta(d.html, d.version, false); return; }
+  if (!igual) { document.getElementById('nueva').style.display = 'block'; }
 };
 var s = document.createElement('script');
 s.src = TIENDA_URL + '?accion=beta&archivo=' + encodeURIComponent(m + '_BETA.html') + '&callback=' + cbName + '&t=' + Date.now();
-s.onerror = function(){ msg.textContent = 'Sin conexión con el servidor.'; };
+s.onerror = function(){ if (!pintado) { msg.textContent = 'Sin conexión con el servidor.'; } };
 document.body.appendChild(s);
 </script>
 </body>
