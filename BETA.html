@@ -9,7 +9,8 @@ html,body{margin:0;height:100%;background:#05080B;color:#E8EDF2;font-family:-app
 #msg{padding:40px 20px;text-align:center;font-size:14px;line-height:1.5}
 #f{border:0;width:100%;height:100%;display:none}
 #tag{position:fixed;top:4px;left:50%;transform:translateX(-50%);background:#F0A32A;color:#1F1402;
-  font-size:9px;font-weight:800;padding:2px 8px;border-radius:10px;z-index:9;pointer-events:none;display:none}
+  font-size:9px;font-weight:800;padding:2px 8px;border-radius:10px;z-index:9;pointer-events:none;display:none;
+  transition:opacity .6s ease}
 #nueva{position:fixed;left:10px;right:10px;bottom:10px;z-index:20;display:none;
   background:#0C5F45;border:2px solid #1FA97C;border-radius:12px;padding:11px 13px;
   color:#fff;font-size:12px;font-weight:800;text-align:center;cursor:pointer;
@@ -37,12 +38,22 @@ var f   = document.getElementById('f');
 var tag = document.getElementById('tag');
 var guardado = null, pintado = false;
 
+/* La etiqueta naranja se borra sola a los 4 segundos, para que no
+   estorbe al grabar la pantalla. La version tambien sale en la linea
+   gris de abajo del logo. */
+var TAG_T = null;
 function pinta(html, version, deCache){
   f.srcdoc = html;
   f.style.display = 'block';
   msg.style.display = 'none';
   tag.textContent = 'BETA ' + m + ' · ' + version + (deCache ? ' · guardado' : '');
   tag.style.display = 'block';
+  tag.style.opacity = '1';
+  if (TAG_T) { clearTimeout(TAG_T); }
+  TAG_T = setTimeout(function(){
+    tag.style.opacity = '0';
+    setTimeout(function(){ tag.style.display = 'none'; }, 700);
+  }, 4000);
   pintado = true;
 }
 
